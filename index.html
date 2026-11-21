@@ -438,16 +438,16 @@ function toast(h){const el=document.createElement('div');el.className='toast';el
 
 /* ---------------- お守り ---------------- */
 const RELICS={
-  mawashi:{n:'生徒会の腕章',ic:'🎗️',im:'armband',tx:'衝突ダメージ+1（最初から持っている）'},
-  chikaraishi:{n:'重たい通学鞄',ic:'👜',im:'bag',tx:'衝突ダメージ+2'},
-  waraji:{n:'ヘッドホン',ic:'🎧',im:'headphones',tx:'毎ターン移動力+1'},
-  hachimaki:{n:'手作り弁当',ic:'🍱',im:'bento',tx:'戦闘の最初のターン、エネルギー+1'},
-  tate:{n:'校章の盾',ic:'🛡️',im:'shield',tx:'毎ターンのはじめにブロック3'},
-  yakusou:{n:'ほうじ茶の水筒',ic:'🧴',im:'thermos',tx:'戦闘に勝つとHP+5'},
-  maneki:{n:'皆勤メダル',ic:'🏅',im:'medal',tx:'もらえるゴールド+50%'},
-  jizo:{n:'桜のお守り',ic:'🌸',im:'sakura',tx:'敵を穴に落とすたびHP+3'},
-  ootsuchi:{n:'会長の指示書',ic:'📋',im:'clipboard',tx:'押すカードの押す距離+1'},
-  tenugui:{n:'スマホ',ic:'📱',im:'phone',tx:'手札+1枚'},
+  mawashi:{n:'白い鉢巻',ic:'🎗️',im:'hachimaki_w',tx:'衝突ダメージ+1（アカネの愛用品。最初から持っている）'},
+  chikaraishi:{n:'重い文鎮',ic:'🪨',im:'stone',tx:'衝突ダメージ+2'},
+  waraji:{n:'草鞋',ic:'👡',im:'waraji',tx:'毎ターン移動力+1'},
+  hachimaki:{n:'必勝のお守り',ic:'🧧',im:'omamori',tx:'戦闘の最初のターン、エネルギー+1'},
+  tate:{n:'机の天板の盾',ic:'🛡️',im:'deskshield',tx:'毎ターンのはじめにブロック3'},
+  yakusou:{n:'薬草袋',ic:'🌿',im:'herbs',tx:'戦闘に勝つとHP+5'},
+  maneki:{n:'招き猫',ic:'🐱',im:'maneki',tx:'もらえるゴールド+50%'},
+  jizo:{n:'お地蔵さん',ic:'🗿',im:'jizo',tx:'敵を穴に落とすたびHP+3'},
+  ootsuchi:{n:'木槌',ic:'🔨',im:'mallet',tx:'押すカードの押す距離+1'},
+  tenugui:{n:'手ぬぐい',ic:'🧣',im:'towel',tx:'手札+1枚'},
 };
 const rimg=(k,sz=22)=>`<img src="img/r_${RELICS[k].im}.webp" alt="${RELICS[k].n}" style="width:${sz}px;height:${sz}px;object-fit:contain;vertical-align:middle">`;
 const has=k=>run&&run.relics.includes(k);

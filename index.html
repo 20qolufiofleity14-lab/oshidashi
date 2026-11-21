@@ -108,6 +108,26 @@ html.embed .title .logo{top:16px}
 #bscr.th-roof{background:linear-gradient(rgba(60,20,40,.45),rgba(25,15,30,.88)),url(img/bg_sakura.webp) center/cover}
 #bscr.th-boss{background:linear-gradient(rgba(10,14,30,.72),rgba(10,14,30,.92)),url(img/bg_night.webp) center/cover}
 #ruru.on{background:#ff6f9c;color:#fff}
+.upcmp{display:flex;align-items:center;justify-content:center;gap:8px}
+.upcmp>div{display:flex;flex-direction:column;align-items:center;gap:4px}.upcmp .card{width:92px;height:158px;flex:none}
+.upcmp small{color:var(--muted);font-weight:800;font-size:12px}.upcmp .arr{color:var(--gold);font-size:22px}
+.updiff{display:flex;flex-direction:column;gap:4px;background:#0006;border-radius:12px;padding:8px 12px}
+.updiff div{display:flex;align-items:center;gap:8px;font-weight:800}.updiff span{flex:1;font-size:13px}
+.updiff .o{color:var(--muted);text-decoration:line-through}.updiff i{color:var(--gold);font-style:normal}.updiff .n{color:#7dffa0;font-size:20px}
+.updiff em{font-style:normal;font-size:10px;background:#2f8f4f;color:#fff;border-radius:6px;padding:1px 6px}
+.upstage{position:relative;height:220px;display:flex;align-items:center;justify-content:center;overflow:visible}
+.upcard{position:absolute}.upcard .card{width:92px;height:158px;transform:scale(1.25)}
+.upold{animation:upold .5s ease-in forwards}
+@keyframes upold{0%{transform:scale(1)}60%{transform:scale(1.08);filter:brightness(2.5)}100%{transform:scale(.2) rotate(-20deg);opacity:0}}
+.upnew{opacity:0;animation:upnew .55s cubic-bezier(.3,1.6,.5,1) .45s forwards}
+@keyframes upnew{from{opacity:0;transform:scale(.3) rotate(15deg);filter:brightness(3)}to{opacity:1;transform:none;filter:none}}
+.upnew .card{box-shadow:0 0 0 3px #ffe14a,0 0 26px 6px rgba(255,210,60,.75),0 6px 0 #000}
+.upburst{position:absolute;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,240,170,.95) 0,rgba(255,180,60,.5) 35%,transparent 70%);opacity:0;animation:upb .9s ease-out .4s forwards}
+@keyframes upb{0%{opacity:0;transform:scale(.2)}30%{opacity:1}100%{opacity:0;transform:scale(1.5)}}
+.spk{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px;background:#ffe14a;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);opacity:0;animation:spk .7s ease-out forwards}
+@keyframes spk{0%{opacity:1;transform:rotate(var(--a)) translateY(0) scale(.5)}100%{opacity:0;transform:rotate(var(--a)) translateY(calc(var(--d)*-1)) scale(1.3)}}
+.upttl{text-align:center;animation:upnew .4s ease-out .7s backwards}
+.uptx{text-align:center;font-weight:700;margin:0;background:#f6efe2;color:#2a1d18;border-radius:12px;padding:8px 12px}
 .mem{display:flex;gap:10px;align-items:center;background:var(--panel);border-radius:14px;padding:8px 10px;border:2px solid transparent;cursor:pointer;text-align:left;width:100%;color:var(--fg);font:inherit;box-shadow:none}
 .mem img{width:58px;height:58px;border-radius:50%;object-fit:cover;flex:none;border:3px solid var(--mc);background:#f6efe2}
 .mem b{font-size:15px}.mem small{display:block;color:var(--muted);font-size:12px;line-height:1.45;font-weight:600}
@@ -1252,13 +1272,40 @@ function pickCard(title,filter,cb){
   modal(`<h3>${title}</h3><div class="list">${list.map(o=>cardHtml(o.c,`data-i="${o.i}"`)).join('')||'<p>選べるカードがない</p>'}</div><button class="sub" onclick="closeModal()">やめる</button>`);
   document.querySelectorAll('#modal .list .card').forEach(el=>el.onclick=()=>{closeModal();cb(+el.dataset.i)});
 }
+/* ---------- 強化：何がどう良くなったかを見せてから次へ（ご褒美は見せてこそ 桜井 #075） ---------- */
+const UPLB={c:'コスト',d:'ダメージ',p:'押す距離',b:'ブロック',m:'移動力',dr:'引く枚数',rg:'届く距離',k:'衝突ダメージ+'};
+function upDiff(id){const d=CARDS[id],a=d.v,b=Object.assign({},d.v,d.u);const out=[];
+  const ca=d.c,cb=d.u&&d.u.c!=null?d.u.c:d.c;if(ca!==cb)out.push(['c',ca,cb]);
+  for(const k of Object.keys(b)){if(k==='c')continue;if(a[k]!==b[k])out.push([k,a[k]==null?0:a[k],b[k]])}return out}
+function diffHtml(id){const df=upDiff(id);
+  return df.length?`<div class="updiff">${df.map(([k,x,y])=>`<div><span>${UPLB[k]||k}</span><b class="o">${x}</b><i>→</i><b class="n">${y}</b>${k==='c'?'<em>軽く</em>':'<em>UP</em>'}</div>`).join('')}</div>`:''}
+function upgradePreview(i,done,back){
+  const c=run.deck[i];const after={id:c.id,up:true};
+  modal(`<h3>この技を強化する？</h3>
+    <div class="upcmp"><div>${cardHtml(c)}<small>いま</small></div><div class="arr">▶</div><div>${cardHtml(after)}<small>強化後</small></div></div>
+    ${diffHtml(c.id)}
+    <button id="upok">強化する</button><button class="sub" id="upng">選び直す</button>`);
+  $('#upok').onclick=()=>{closeModal();upgradeShow(i,done)};
+  $('#upng').onclick=()=>{closeModal();back&&back()};
+}
+function upgradeShow(i,done){
+  const c=run.deck[i];const before={id:c.id,up:false};c.up=true;saveRun();
+  modal(`<div class="upstage"><div class="upburst"></div>${Array.from({length:14},(_,k)=>`<i class="spk" style="--a:${k*360/14}deg;--d:${60+(k%3)*22}px;animation-delay:${.45+(k%4)*.05}s"></i>`).join('')}
+      <div class="upcard upold">${cardHtml(before)}</div><div class="upcard upnew">${cardHtml(c)}</div></div>
+    <h3 class="upttl">強化成功！ 「${cname(c)}」</h3>
+    ${diffHtml(c.id)}
+    <p class="uptx">${ctext(c)}</p>
+    <button id="upnext">次へ</button>`);
+  const m=$('#modal');m.onclick=null;sfx('card');setTimeout(()=>{sfx('win');},450);
+  $('#upnext').onclick=()=>{closeModal();done&&done()};
+}
 function showRest(){B=null;
   const h=Math.round(run.maxHp*(A(4)?.25:P['休憩の回復割合']));
   app.innerHTML=`<div class="scr">${hudHtml()}<div class="panel"><h2>🔥 休憩</h2><p style="text-align:center">焚き火がある。どちらか1つ。</p>
     <button id="r1">休む（HP+${h}）</button><button id="r2">鍛える（カード1枚を強化）</button></div></div><div id="modal"></div>`;
   hudBind();
   $('#r1').onclick=()=>{run.hp=Math.min(run.maxHp,run.hp+h);sfx('win');showMap()};
-  $('#r2').onclick=()=>pickCard('強化するカード',c=>!c.up&&CARDS[c.id].r!=='x',i=>{run.deck[i].up=true;sfx('win');showMap()});
+  $('#r2').onclick=()=>pickCard('強化するカード（タップで強化後を確認）',c=>!c.up&&CARDS[c.id].r!=='x',i=>upgradePreview(i,()=>showMap(),()=>$('#r2').onclick()));
 }
 function showShop(){B=null;
   const cards=rollCards(3).map(c=>({...c,price:{c:45,u:70,r:110}[CARDS[c.id].r]+rnd(10)}));
@@ -1280,7 +1327,7 @@ function showShop(){B=null;
 const EVENTS=[
   {t:'道端のお地蔵さま',d:'苔むしたお地蔵さまが立っている。',ops:[{l:'手を合わせる（最大HP+6）',f:()=>{run.maxHp+=6;run.hp+=6}},{l:'通り過ぎる',f:()=>{}}]},
   {t:'怪しい行商人',d:'「とっておきの技を30ゴールドでどうだい」',ops:[{l:'買う（−30ゴールド・珍しい技）',ok:()=>run.gold>=30,f:()=>{run.gold-=30;const rs=Object.keys(CARDS).filter(k=>CARDS[k].r==='r'&&cardOK(k));const id=pick(rs.length?rs:Object.keys(CARDS).filter(k=>CARDS[k].r==='u'&&cardOK(k)));run.deck.push({id,up:false});return`「${CARDS[id].n}」を覚えた`}},{l:'断る',f:()=>{}}]},
-  {t:'荒れた稽古場',d:'誰もいない稽古場。体を張れば技が磨ける。',ops:[{l:'稽古する（HP−7・ランダムに1枚強化）',ok:()=>run.hp>7,f:()=>{run.hp-=7;const c=shuffle(run.deck.filter(c=>!c.up&&CARDS[c.id].r!=='x'))[0];if(c){c.up=true;return`「${cname(c)}」になった`}}},{l:'通り過ぎる',f:()=>{}}]},
+  {t:'荒れた稽古場',d:'誰もいない稽古場。体を張れば技が磨ける。',ops:[{l:'稽古する（HP−7・ランダムに1枚強化）',ok:()=>run.hp>7,f:()=>{run.hp-=7;const c=shuffle(run.deck.filter(c=>!c.up&&CARDS[c.id].r!=='x'))[0];if(c){upgradeShow(run.deck.indexOf(c),()=>showMap());return{wait:1}}}},{l:'通り過ぎる',f:()=>{}}]},
   {t:'古い道場',d:'師範が言う。「技を一つ忘れなさい。身軽になる」',ops:[{l:'忘れる（カードを1枚選んで捨てる）',pick:1},{l:'断る',f:()=>{}}]},
   {t:'落ちていた財布',d:'道に財布が落ちている。',ops:[{l:'拾う（+40ゴールド）',f:()=>{run.gold+=40}},{l:'交番に届ける（最大HP+3、HP全快）',f:()=>{run.maxHp+=3;run.hp=run.maxHp}}]},
   {t:'力自慢の像',d:'岩を持ち上げる力士の像。台座に「押せ」と彫られている。',ops:[{l:'押してみる（HP−5・お守りをもらう）',ok:()=>run.hp>5,f:()=>{run.hp-=5;const r=rollRelic();if(r){run.relics.push(r);return`「${RELICS[r].n}」を手に入れた`}}},{l:'やめておく',f:()=>{}}]},
@@ -1292,7 +1339,7 @@ function showEvent(){B=null;
   hudBind();
   document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const o=ev.ops[+b.dataset.i];
     if(o.pick)return pickCard('捨てるカード',()=>true,i=>{run.deck.splice(i,1);sfx('coin');showMap()});
-    const r=o.f();sfx('coin');if(r){$('#evr').textContent=r;document.querySelectorAll('.opt').forEach(x=>x.disabled=true);setTimeout(showMap,1200)}else showMap()});
+    const r=o.f();if(r&&r.wait)return;sfx('coin');if(r){$('#evr').textContent=r;document.querySelectorAll('.opt').forEach(x=>x.disabled=true);setTimeout(showMap,1200)}else showMap()});
 }
 
 /* =====================================================================

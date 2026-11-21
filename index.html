@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="オシダシ">
 <meta name="mini-category" content="other">
 <meta name="mini-desc" content="押して、ぶつけて、落とす。デッキ構築×マス目タクティクスのローグライト">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Shippori+Mincho+B1:wght@800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Mochiy+Pop+One&family=Shippori+Mincho+B1:wght@800&display=swap">
 <style>
 /* 【見た目】判定のあるもの（床・岩・穴・敵の攻撃マス）を明るく強く、背景は暗く控えめに（桜井 #030） */
 :root{
@@ -48,9 +48,20 @@ button:disabled{opacity:.4}
 .title .shade{position:absolute;left:0;right:0;bottom:0;height:55%;background:linear-gradient(transparent,rgba(19,32,27,.92) 45%,#13201b);pointer-events:none}
 .title h1,.title .tag,.title .asc,.title .btns,.title .best{position:relative;z-index:2}
 .title .logo{position:absolute;top:calc(env(safe-area-inset-top) + 18px);left:0;right:0;z-index:2}
-.title h1{font-family:var(--title);font-size:60px;margin:0;letter-spacing:.04em;color:#fff;
-  -webkit-text-stroke:3px #7a2533;paint-order:stroke;text-shadow:0 5px 0 #3a1a24,0 0 30px rgba(255,122,61,.45);transform:rotate(-3deg)}
-.title .club{display:inline-block;margin-top:6px;background:#f6efe2;color:#7a2533;font-weight:900;font-size:13px;padding:4px 14px;border-radius:999px;letter-spacing:.08em}
+.title h1{font-family:"Mochiy Pop One",var(--title);font-weight:400;font-size:58px;line-height:1;margin:0;display:flex;justify-content:center;gap:1px;transform:rotate(-4deg)}
+.title h1 span{display:inline-block;color:#ff6f9c;-webkit-text-stroke:9px #fff;paint-order:stroke fill;
+  filter:drop-shadow(0 4px 0 #b8325e) drop-shadow(0 8px 10px rgba(58,26,36,.45));animation:lbounce .7s cubic-bezier(.3,1.6,.5,1) backwards}
+.title h1 span:nth-child(2){color:#ff9a3d;transform:translateY(-6px) rotate(4deg);animation-delay:.06s}
+.title h1 span:nth-child(3){color:#ff6f9c;transform:translateY(2px) rotate(-3deg);animation-delay:.12s}
+.title h1 span:nth-child(4){color:#ff9a3d;transform:translateY(-4px) rotate(5deg);animation-delay:.18s}
+.title h1 span.ex{color:#ffd23f;transform:rotate(12deg);animation-delay:.24s;margin-left:2px}
+@keyframes lbounce{from{opacity:0;scale:.3}}
+.title .logo .petal{position:absolute;width:26px;height:26px;pointer-events:none}
+.title .club{position:relative;display:inline-block;margin-top:12px;background:#fff;color:#c2416b;font-weight:900;font-size:13px;padding:5px 20px;letter-spacing:.12em;
+  border-radius:4px;box-shadow:0 3px 0 #b8325e;transform:rotate(-2deg)}
+.title .club::before,.title .club::after{content:"";position:absolute;top:4px;width:14px;height:100%;background:#ffc2d4;z-index:-1}
+.title .club::before{left:-10px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,40% 50%)}
+.title .club::after{right:-10px;clip-path:polygon(0 0,100% 0,60% 50%,100% 100%,0 100%)}
 .title .tag{font-size:18px;font-weight:800}
 .title .demo{font-size:44px;letter-spacing:2px;margin:6px 0 4px}
 .title .demo span{display:inline-block}
@@ -1187,7 +1198,7 @@ function showTitle(){
   const saved=ls.get('oshidashi.run',null);const best=ls.get('oshidashi.best',null);
   app.innerHTML=`<div class="scr title">
     <div class="girls"><img class="mio" src="${IMG.mio}" alt="生徒会長・天道ミオ"><img class="akane" src="${IMG.akane}" alt="押切アカネ"></div><div class="shade"></div>
-    <div class="logo"><h1>オシダシ！</h1><div class="club">放課後おしだし部</div></div>
+    <div class="logo"><svg class="petal" viewBox="0 0 24 24" style="left:9%;top:-4px;transform:rotate(-20deg)" aria-hidden="true"><g fill="#ffc2d4" stroke="#fff" stroke-width="1.2"><ellipse cx="12" cy="6" rx="3.6" ry="5.5"/><ellipse cx="12" cy="6" rx="3.6" ry="5.5" transform="rotate(72 12 12)"/><ellipse cx="12" cy="6" rx="3.6" ry="5.5" transform="rotate(144 12 12)"/><ellipse cx="12" cy="6" rx="3.6" ry="5.5" transform="rotate(216 12 12)"/><ellipse cx="12" cy="6" rx="3.6" ry="5.5" transform="rotate(288 12 12)"/></g><circle cx="12" cy="12" r="2.2" fill="#ffd23f"/></svg><svg class="petal" viewBox="0 0 24 24" style="right:7%;top:54px;width:20px;height:20px;transform:rotate(30deg)" aria-hidden="true"><g fill="#ffc2d4" stroke="#fff" stroke-width="1.2"><ellipse cx="12" cy="6" rx="3.6" ry="5.5"/><ellipse cx="12" cy="6" rx="3.6" ry="5.5" transform="rotate(72 12 12)"/><ellipse cx="12" cy="6" rx="3.6" ry="5.5" transform="rotate(144 12 12)"/><ellipse cx="12" cy="6" rx="3.6" ry="5.5" transform="rotate(216 12 12)"/><ellipse cx="12" cy="6" rx="3.6" ry="5.5" transform="rotate(288 12 12)"/></g><circle cx="12" cy="12" r="2.2" fill="#ffd23f"/></svg><h1><span>オ</span><span>シ</span><span>ダ</span><span>シ</span><span class="ex">！</span></h1><div class="club">放課後おしだし部</div></div>
     <div class="tag">押して、ぶつけて、落とせ。</div>
     ${META.ascOpen?`<div class="asc"><button class="sub" id="am">−</button><span>本気度 <span id="av">${META.asc}</span>　<small id="ad" style="color:var(--muted);font-weight:600"></small></span><button class="sub" id="ap">＋</button></div>`:'<div class="best">優勝すると「本気度」が解放される</div>'}
     <div class="btns"><button id="go">はじめる</button>${saved&&saved.ver===1?'<button class="sub" id="cont">つづきから</button>':''}

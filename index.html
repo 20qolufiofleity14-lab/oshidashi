@@ -623,21 +623,30 @@ function showMap(){
   fl.forEach((a,f)=>a.forEach((n,i)=>{const av=avail.some(v=>v.f===f&&v.i===i);const cur=run.pos&&run.pos.f===f&&run.pos.i===i;const done=run.pos&&f<run.pos.f;
     const r=n.t==='boss'?28:20;
     nodes+=`<g class="node ${av?'av':''} ${cur?'cur':''} ${done?'done':''}" data-f="${f}" data-i="${i}"><circle cx="${X(n.lane)}" cy="${Y(f)}" r="${r}"/><text x="${X(n.lane)}" y="${Y(f)}" style="font-size:${n.t==='boss'?28:20}px">${NODE[n.t].ic}</text></g>`}));
+  let labels='';let prevK='';
+  for(let f=0;f<F;f++){const k=themeKey(f);if(k!==prevK){prevK=k;const yTop=Y(f)+30;
+    labels+=`<line x1="0" y1="${yTop}" x2="${W}" y2="${yTop}" stroke="rgba(255,255,255,.12)" stroke-dasharray="2 6"/><text x="8" y="${yTop-8}" style="font-size:12px;font-weight:800;fill:rgba(246,239,226,.75);text-anchor:start;dominant-baseline:auto">${THEMES[k].n}</text>`}}
+  const intro=!run.pos;
   app.innerHTML=`<div class="scr">${hudHtml()}
-    <div class="maph"><span>${run.pos?run.pos.f+1:0}階 / ${F}階　<small style="color:var(--muted)">光る所を選ぶ</small></span><button class="sub" id="deckb" style="padding:6px 10px;font-size:13px">デッキ ${run.deck.length}</button></div>
-    <div class="mapw" id="mapw"><svg width="${W}" height="${H}">${lines}${nodes}</svg></div>
-    <div class="mapmemo"><img src="${FACE.mio[pick(['soft','smile','think'])]}" alt=""><div>${pick(MEMO)}</div></div>
+    <div class="maph"><span>${run.pos?run.pos.f+1+'階 / '+F+'階':'全体図（全'+F+'階）'}　<small style="color:var(--muted)">光る所を選ぶ</small></span><button class="sub" id="deckb" style="padding:6px 10px;font-size:13px">デッキ ${run.deck.length}</button></div>
+    <div class="mapw" id="mapw"><svg width="${W}" height="${H}">${labels}${lines}${nodes}</svg></div>
+    <div class="mapmemo"><img src="${FACE.mio[pick(['soft','smile','think'])]}" alt=""><div>${intro?`全${F}階、てっぺんの👿が鬼校長よ。階ごとに舞台が変わるわ。まずは一番下の1階から。`:pick(MEMO)}</div></div>
     <div class="legend">${Object.values(NODE).map(n=>`<span>${n.ic} ${n.n}</span>`).join('')}</div></div><div id="modal"></div>`;
   hudBind();
   $('#deckb').onclick=()=>showDeck();
-  const mw=$('#mapw');const cy=run.pos?Y(run.pos.f):Y(0);mw.scrollTop=Math.max(0,cy-mw.clientHeight*.65);
+  const mw=$('#mapw');const cy=run.pos?Y(run.pos.f):Y(0);const target=Math.max(0,cy-mw.clientHeight*.65);
+  if(intro){// 最初に全体図：てっぺん（鬼校長）から1階までゆっくり見せる
+    mw.scrollTop=0;const t0=performance.now(),dur=1600;let stop=false;mw.addEventListener('touchstart',()=>stop=true,{once:true});mw.addEventListener('wheel',()=>stop=true,{once:true});
+    setTimeout(()=>{const t1=performance.now();const step=t=>{if(stop)return;const k=Math.min(1,(t-t1)/dur),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;mw.scrollTop=target*e;if(k<1)requestAnimationFrame(step)};requestAnimationFrame(step)},700);
+  }else mw.scrollTop=target;
   mw.querySelectorAll('.node.av').forEach(g=>g.onclick=()=>{ac();const f=+g.dataset.f,i=+g.dataset.i;run.pos={f,i};enterNode(fl[f][i])});
 }
 const MEMO=['💀の強敵は手強いけど、倒せばお守りが手に入るわ。','🔥休憩では、休むか技を鍛えるか。鍛えた技は長く効くわよ。','🛒お店では技を捨てることもできるの。山札は軽い方が強いわ。',
   '押す技が多いほど、穴と岩が武器になる。地形をよく見て。','一番上の👿が鬼校長。そこまでにHPを残しておきなさい。','❓の出来事は運試し。HPに余裕がある時に寄るといいわ。'];
 function enterNode(n){
   sfx('card');
-  if(n.t==='battle'||n.t==='elite'||n.t==='boss')startBattle(n.t);
+  if(n.t==='battle'&&run.pos.f===0&&!META.tutDone)startBattle('tut');
+  else if(n.t==='battle'||n.t==='elite'||n.t==='boss')startBattle(n.t);
   else if(n.t==='rest')showRest();
   else if(n.t==='shop')showShop();
   else if(n.t==='event')showEvent();
@@ -1397,7 +1406,7 @@ function showSelect(mode){
     ${Object.keys(MEMBERS).map(k=>memberCard(k)).join('')}
     <button class="sub" id="back">もどる</button></div></div><div id="modal"></div>`;
   document.querySelectorAll('.mem').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(!memberOK(k)){sfx('bad');return}
-    ac();sfx('win');newRun(k,mode);run.pos={f:0,i:0};startBattle('battle')});
+    ac();sfx('win');newRun(k,mode);showMap()});
   $('#back').onclick=()=>showTitle();
 }
 function showMembers(){
@@ -1438,7 +1447,7 @@ function showTitle(){
     <div class="best">${best?`自己ベスト ${best.score}（${best.rank}）${best.win?' 優勝':` ${best.floor}階まで`}`:'デッキ構築 × マス目タクティクス'}</div>
   </div><div id="modal"></div>`;
   // 最初の3分で面白さを（桜井 #017）：説明画面を挟まず、いきなり1戦目（チュートリアル込み）
-  $('#go').onclick=()=>{ac();sfx('win');if(!META.tutDone){newRun('mio','full');run.pos={f:0,i:0};startBattle('tut')}else showSelect('full')};
+  $('#go').onclick=()=>{ac();sfx('win');if(!META.tutDone){newRun('mio','full');showMap()}else showSelect('full')};
   $('#daily').onclick=()=>{ac();sfx('card');showSelect('daily')};
   $('#memb').onclick=()=>showMembers();$('#zkb').onclick=()=>showZukan();
   if($('#cont'))$('#cont').onclick=()=>{ac();run=saved;RNG=Math.random;showMap()};

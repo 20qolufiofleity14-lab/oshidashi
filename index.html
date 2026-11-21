@@ -93,6 +93,34 @@ html.embed .title .logo{top:16px}
   box-shadow:0 0 0 3px #1d2e26,0 0 0 9px #2f4a3a,0 0 0 11px #7a5230,0 12px 30px #000}
 .tile{position:absolute;width:var(--T);height:var(--T);border:1px solid rgba(60,30,10,.25)}
 .tile.f{background:linear-gradient(rgba(240,205,155,.42),rgba(240,205,155,.42)),url(img/t_floor.webp) center/cover}
+.tile.sl::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.65) 45%,rgba(160,220,255,.35) 55%,rgba(255,255,255,0) 70%);background-size:200% 200%;animation:shine 2.4s linear infinite;box-shadow:inset 0 0 0 2px rgba(120,200,255,.6)}
+@keyframes shine{from{background-position:100% 100%}to{background-position:-100% -100%}}
+.tile.hz::after{content:"";position:absolute;inset:8%;border-radius:40%;background:radial-gradient(circle at 40% 35%,#d9ff9a,#5bd14a 55%,#2b7a2a);opacity:.85;box-shadow:0 0 10px #7dff5a}
+.tile.sh{background:linear-gradient(#6b3d1f,#4a2810);box-shadow:inset 0 0 0 3px #2a1608}
+.tile.sh::before{content:"";position:absolute;inset:6px 5px;background:repeating-linear-gradient(90deg,#c0392b 0 6px,#2e86c1 6px 11px,#f1c40f 11px 15px,#27ae60 15px 21px,#8e44ad 21px 25px);
+  box-shadow:inset 0 -3px 0 #3a1d0a,0 calc(var(--T)*.42) 0 -2px #3a1d0a;clip-path:inset(0 0 52% 0)}
+.tile.sh::after{content:"";position:absolute;left:5px;right:5px;top:53%;bottom:6px;background:repeating-linear-gradient(90deg,#16a085 0 5px,#d35400 5px 11px,#2c3e50 11px 16px,#f39c12 16px 22px)}
+#board.edge{box-shadow:0 0 0 3px #1d2e26,0 0 0 9px #b8325e,0 0 18px 10px rgba(255,80,120,.45),0 12px 30px #000;animation:edgep 1.6s ease-in-out infinite}
+@keyframes edgep{50%{box-shadow:0 0 0 3px #1d2e26,0 0 0 9px #ff6f9c,0 0 26px 14px rgba(255,80,120,.6),0 12px 30px #000}}
+#bscr.th-gym{background:linear-gradient(rgba(20,40,70,.7),rgba(15,25,45,.92)),url(img/bg_class.webp) center/cover}
+#bscr.th-lib{background:linear-gradient(rgba(60,35,15,.72),rgba(35,20,10,.92)),url(img/bg_class.webp) center/cover}
+#bscr.th-lab{background:linear-gradient(rgba(15,55,35,.72),rgba(10,35,25,.92)),url(img/bg_class.webp) center/cover}
+#bscr.th-roof{background:linear-gradient(rgba(60,20,40,.45),rgba(25,15,30,.88)),url(img/bg_sakura.webp) center/cover}
+#bscr.th-boss{background:linear-gradient(rgba(10,14,30,.72),rgba(10,14,30,.92)),url(img/bg_night.webp) center/cover}
+#ruru.on{background:#ff6f9c;color:#fff}
+.mem{display:flex;gap:10px;align-items:center;background:var(--panel);border-radius:14px;padding:8px 10px;border:2px solid transparent;cursor:pointer;text-align:left;width:100%;color:var(--fg);font:inherit;box-shadow:none}
+.mem img{width:58px;height:58px;border-radius:50%;object-fit:cover;flex:none;border:3px solid var(--mc);background:#f6efe2}
+.mem b{font-size:15px}.mem small{display:block;color:var(--muted);font-size:12px;line-height:1.45;font-weight:600}
+.mem.lock{opacity:.45;cursor:default}.mem.lock img{filter:grayscale(1) brightness(.5)}
+.mem .bd{font-size:11px;color:var(--gold);font-weight:800}
+.modebtn{display:flex;flex-direction:column;align-items:center;gap:2px}
+.modebtn small{font-size:11px;font-weight:700;opacity:.8}
+.zk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.zk .card{height:158px;flex:none}
+.zk .card.unk{filter:brightness(0) opacity(.35)}
+.prof{display:flex;gap:10px;align-items:flex-start}
+.prof img{width:110px;flex:none;filter:drop-shadow(0 4px 8px #0008)}
+.prof li{margin-bottom:4px}.prof li.lk{color:var(--muted)}
 .tile.f.alt{background:linear-gradient(rgba(225,185,130,.4),rgba(225,185,130,.4)),url(img/t_floor2.webp) center/cover}
 .tile.r{background:url(img/t_desk.webp) center/cover}
 .tile.p{background:url(img/t_pit.webp) center/cover}
@@ -297,7 +325,9 @@ const P={
 };
 const N=P['盤のマス数'];
 const DX=[0,1,0,-1],DY=[-1,0,1,0];
-const FLOOR=0,ROCK=1,PIT=2;
+const FLOOR=0,ROCK=1,PIT=2,SLIDE=3,SHELF=4,HAZ=5;
+const walk=v=>v===FLOOR||v===SLIDE||v===HAZ;   // 歩ける床
+const solid=v=>v===ROCK||v===SHELF;            // ぶつかる物
 const DEBUG=/debug/.test(location.search);
 let SPEED=1;
 try{if(window.self!==window.top)document.documentElement.classList.add('embed')}catch(e){document.documentElement.classList.add('embed')}
@@ -307,7 +337,7 @@ const FACE={akane:{},mio:{}};
 ['smile','shout','laugh','giggle','smug'].forEach(m=>FACE.akane[m]=`img/f_akane_${m}.webp`);
 ['smile','closed','normal','think','soft'].forEach(m=>FACE.mio[m]=`img/f_mio_${m}.webp`);
 const DEF_MOOD={akane:'smile',mio:'normal'};
-const faceSrc=(who,mood)=>FACE[who][mood]||FACE[who][DEF_MOOD[who]];
+const faceSrc=(who,mood)=>FACE[who]?(FACE[who][mood]||FACE[who][DEF_MOOD[who]]):MEMBERS[who].face;
 ['t_floor','t_floor2','t_desk','t_pit'].forEach(k=>{const i=new Image();i.src=`img/${k}.webp`});
 ['goblin','archer','bomber','knight','mage','oyabun','boss'].forEach(k=>{const i=new Image();i.src=`img/e_${k}.webp`});
 Object.values(IMG).concat(Object.values(FACE.akane),Object.values(FACE.mio)).forEach(u=>{const i=new Image();i.src=u});
@@ -325,7 +355,10 @@ const LINES={
 const line=k=>pick(LINES[k]);
 const $=s=>document.querySelector(s);
 const app=$('#app');
-const rnd=n=>Math.floor(Math.random()*n);
+let RNG=Math.random;const rand=()=>RNG();
+function seeded(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const todayKey=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+const rnd=n=>Math.floor(rand()*n);
 const pick=a=>a[rnd(a.length)];
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms*SPEED));
@@ -342,7 +375,7 @@ function tone(f,dur,type='square',vol=.2,slide=0,delay=0){const a=ac();if(!a)ret
   o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f*slide),t+dur);
   g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(a.destination);o.start(t);o.stop(t+dur+.02)}
 function noise(dur,vol=.3,hp=800,delay=0){const a=ac();if(!a)return;const t=a.currentTime+delay;const n=Math.floor(a.sampleRate*dur);const b=a.createBuffer(1,n,a.sampleRate);const d=b.getChannelData(0);
-  for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type='highpass';f.frequency.value=hp;
+  for(let i=0;i<n;i++)d[i]=(rand()*2-1)*Math.pow(1-i/n,2);const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type='highpass';f.frequency.value=hp;
   const g=a.createGain();g.gain.value=vol;s.connect(f).connect(g).connect(a.destination);s.start(t)}
 const SFX={
   kill(){noise(.35,.5,200);tone(160,.3,'sawtooth',.25,.3)},
@@ -408,7 +441,7 @@ const CARDS={
     fx:async(x,v)=>{const p=B.pl;flash();shake('m');sfx('boom');const es=enemies().sort((a,b)=>man(b,p)-man(a,p));
       for(const e of es){if(!e.alive)continue;const dx=e.x-p.x,dy=e.y-p.y;const d=Math.abs(dx)>=Math.abs(dy)?(dx>0?1:3):(dy>0?2:0);await push(e,d,pv(v.p))}}},
   kyuusho:{n:'急所突き',c:1,k:'atk',r:'c',t:'adj',v:{d:4},u:{d:6},tx:v=>`隣の敵に${v.d}ダメージ。敵の向こう側がふさがっていれば3倍`,
-    fx:async(x,v)=>{const e=x.u;const bx=e.x+DX[x.dir],by=e.y+DY[x.dir];const blocked=!inB(bx,by)||B.g[by][bx]===ROCK||!!unitAt(bx,by);
+    fx:async(x,v)=>{const e=x.u;const bx=e.x+DX[x.dir],by=e.y+DY[x.dir];const blocked=!inB(bx,by)||solid(B.g[by][bx])||!!unitAt(bx,by);
       if(blocked)praise('急所!');await atk(x,blocked?v.d*3:v.d,blocked)}},
   otoshiana:{n:'落とし穴',c:2,k:'skl',r:'r',t:'tile',ex:1,v:{rg:2},u:{c:1,rg:3},tx:v=>`${v.rg}マス以内の空きマスを穴にする。使うと消える`,
     fx:async(x,v)=>{B.g[x.y][x.x]=PIT;sfx('coll');shake('m');buildTiles();render();await sleep(150)}},
@@ -429,7 +462,9 @@ const ctext=c=>CARDS[c.id].tx(cv(c));
 const crange=c=>cv(c).rg||CARDS[c.id].rg||4;
 
 /* ---------------- 周回要素：本気度・実績・解放（ご褒美を目の前に吊るす 桜井 #023） ---------------- */
-let META=Object.assign({runs:0,wins:0,kills:0,falls:0,ff:0,ascOpen:0,asc:0,ach:{}},ls.get('oshidashi.meta',{}));
+let META=Object.assign({runs:0,wins:0,kills:0,falls:0,ff:0,ascOpen:0,asc:0,ach:{},seen:{},bond:{},daily:{},bestChain:0},ls.get('oshidashi.meta',{}));
+['seen','bond','daily'].forEach(k=>{if(!META[k])META[k]={}});
+if(META.runs>0&&!META.tutDone)META.tutDone=1;
 const saveMeta=()=>ls.set('oshidashi.meta',META);
 const ASC=['','強敵のHP+20%','普通の敵のHP+10%','敵の攻撃+1','休憩の回復が25%に','最初のゴールド0・もらえるゴールド−20%','最大HP−6でスタート',
   '鬼校長のHP+20%・攻撃+2','敵が1体増えることがある','最初のデッキに「迷い」','敵の攻撃さらに+1'];
@@ -448,6 +483,9 @@ const ACH=[
   {id:'asc5',ic:'🔥',n:'本気の本気',d:'本気度5以上で優勝'},
   {id:'asc10',ic:'👑',n:'横綱',d:'本気度10で優勝'},
   {id:'runs10',ic:'🔁',n:'稽古熱心',d:'10回挑戦する'},
+  {id:'chain3',ic:'🎳',n:'ドミノ倒し',d:'3体以上を連鎖で押す'},
+  {id:'daily3',ic:'📅',n:'放課後の常連',d:'今日の放課後を3日クリア'},
+  {id:'allmem',ic:'🌸',n:'部員そろい踏み',d:'全員と1回ずつ優勝する'},
   {id:'kills100',ic:'⚔️',n:'百人斬り',d:'累計100体を倒す'},
 ];
 const LOCK={};ACH.forEach(a=>{if(a.un)LOCK[a.un]=a.id});
@@ -458,6 +496,33 @@ function ach(id){
   toast(`${a.ic} 実績「<b>${a.n}</b>」${a.un?`<br>新しい技「${CARDS[a.un].n}」が出るように！`:''}`);sfx('win');
 }
 function toast(h){const el=document.createElement('div');el.className='toast';el.innerHTML=h;app.appendChild(el);setTimeout(()=>el.remove(),3300)}
+
+/* ---------------- 部員（相棒）：一言で言える性格まで尖らせる（桜井 #204） ---------------- */
+const MEMBERS={
+  mio:{n:'天道ミオ',role:'生徒会長',face:'img/f_mio_normal.webp',full:'img/mio.webp',col:'#9b7bff',
+    perk:'統率：毎ターンのはじめにブロック4',cards:['teppeki','seoi','shouha','acchi'],
+    lines:{start:'作戦はわたしに任せて。守りは固めておくわ。',fall:'計算どおりね。',win:'上出来よ。'},
+    unlock:null,prof:['生徒会長。成績は学年1位、運動は…秘密。','アカネとは幼なじみ。昔から振り回されている。','本当は甘いものに目がない。生徒会室の引き出しに常備。']},
+  rin:{n:'剣崎リン',role:'剣道部',face:'img/pf_rin.webp',full:'img/rin.webp',col:'#3b5bd8',
+    perk:'一閃：攻撃カードのダメージ+2',cards:['harite','renda','kyuusho','konshin'],
+    lines:{start:'押し出しは剣と同じ。間合いが全てだ。',fall:'…一本。',win:'悪くない稽古だった。'},
+    unlock:{ach:'elite',tx:'強敵に勝つ'},prof:['剣道部の主将。無口だが面倒見がいい。','竹刀は毎朝手入れする。','可愛いものが好きなのを隠している。']},
+  hina:{n:'早瀬ヒナ',role:'陸上部',face:'img/pf_hina.webp',full:'img/hina.webp',col:'#d8892b',
+    perk:'俊足：毎ターンの移動力+1。移動で敵の隣に入るとブロック2',cards:['shippu','ukenagashi','fukitobashi','irekae'],
+    lines:{start:'よーいドン！ 走って押して、また走る！',fall:'はっや〜い！',win:'自己ベスト更新〜！'},
+    unlock:{ach:'floor5',tx:'5階にたどり着く'},prof:['陸上部の短距離エース。','日焼けは勲章だと思っている。','テスト前だけユキに泣きつく。']},
+  yuki:{n:'白石ユキ',role:'図書委員',face:'img/pf_yuki.webp',full:'img/yuki.webp',col:'#7aa0c8',
+    perk:'博識：毎ターン手札+1。戦闘の最初に「先読み」を1枚加える',cards:['yochi','kusari'],
+    lines:{start:'敵の動きは全部、本に書いてあります。',fall:'予定どおりです。',win:'しおりを挟んでおきますね。'},
+    unlock:{ach:'ff3',tx:'1回の挑戦で同士討ちを3回'},prof:['図書委員。眼鏡を上げる癖がある。','年間300冊読む。','実は怖い話が苦手。']},
+  ruru:{n:'天野ルル',role:'理科部',face:'img/pf_ruru.webp',full:'img/ruru.webp',col:'#ff6f9c',
+    perk:'実験：戦闘ごとに1回、空きマスを穴にできる（盤の下のボタン）',cards:['kairiki','iwaotoshi','otoshiana','tsunami'],
+    lines:{start:'実験開始〜！ 床、ちょっと抜いちゃうね？',fall:'実験成功〜♪',win:'データ取れた〜！'},
+    unlock:{ach:'falls5',tx:'1回の挑戦で5体を穴に落とす'},prof:['理科部の唯一の部員。','白衣のポケットに何でも入っている。','爆発させた回数は数えていない。']},
+};
+const memberOK=k=>!MEMBERS[k].unlock||!!META.ach[MEMBERS[k].unlock.ach];
+const PT=()=>run&&run.partner;
+const isP=k=>PT()===k;
 
 /* ---------------- お守り ---------------- */
 const RELICS={
@@ -489,10 +554,14 @@ const EN={
 /* =====================================================================
    ラン（1回の挑戦）
    ===================================================================== */
-function newRun(){
-  const asc=Math.min(META.asc||0,META.ascOpen||0);
-  run={hp:P['初期HP'],maxHp:P['初期HP'],gold:50,deck:STARTER.map(id=>({id,up:false})),relics:['mawashi'],asc,newAch:[],
-    map:genMap(),pos:null,stats:{kills:0,falls:0,ff:0,maxColl:0,turns:0},retries:0,floorsDone:0,ver:1};
+function newRun(partner='mio',mode='full'){
+  const asc=mode==='daily'?0:Math.min(META.asc||0,META.ascOpen||0);
+  if(mode==='daily'){const k=todayKey();let h=0;for(const ch of k)h=(h*31+ch.charCodeAt(0))|0;RNG=seeded(h)}else RNG=Math.random;
+  run={hp:P['初期HP'],maxHp:P['初期HP'],gold:50,deck:STARTER.map(id=>({id,up:false})),relics:['mawashi'],asc,newAch:[],partner,mode,day:mode==='daily'?todayKey():null,
+    map:null,pos:null,stats:{kills:0,falls:0,ff:0,maxColl:0,turns:0,maxChain:0},retries:0,floorsDone:0,ver:1};
+  run.map=genMap(mode==='daily'?6:P['階の数']);
+  // 相棒の技を1枚デッキへ
+  const pc=MEMBERS[partner].cards.filter(cardOK);if(pc.length)run.deck.push({id:pick(pc),up:false});
   if(A(5))run.gold=0;
   if(A(6)){run.maxHp-=6;run.hp-=6}
   if(A(9))run.deck.push({id:'mayoi',up:false});
@@ -503,21 +572,21 @@ function clearRun(){ls.del('oshidashi.run')}
 
 /* ---------------- マップ ---------------- */
 const NODE={battle:{ic:'⚔️',n:'戦闘'},elite:{ic:'💀',n:'強敵（お守り）'},rest:{ic:'🔥',n:'休憩'},shop:{ic:'🛒',n:'店'},event:{ic:'❓',n:'出来事'},boss:{ic:'👿',n:'鬼校長'}};
-function genMap(){
-  const F=P['階の数'];const fl=[];
+function genMap(F){
+  F=F||P['階の数'];const fl=[];
   for(let f=0;f<F;f++){
     let lanes;
     if(f===0||f===F-1)lanes=[1];
-    else{const c=Math.random()<.55?3:2;lanes=c===3?[0,1,2]:shuffle([0,1,2]).slice(0,2).sort()}
+    else{const c=rand()<.55?3:2;lanes=c===3?[0,1,2]:shuffle([0,1,2]).slice(0,2).sort()}
     fl.push(lanes.map(l=>{let t;
-      if(f===0)t='battle';else if(f===F-1)t='boss';else if(f===F-2)t='rest';
-      else if(f===1)t=Math.random()<.7?'battle':'event';
+      if(f===0)t='battle';else if(f===F-1)t='boss';else if(f===F-2)t=F>=8?'rest':pick(['rest','shop']);
+      else if(f===1)t=rand()<.7?'battle':'event';
       else{const w=[['battle',44],['event',18],['shop',f>=2?13:0],['elite',f>=3?13:0],['rest',f>=3&&f!==F-3?12:0]];
-        let s=w.reduce((a,b)=>a+b[1],0)*Math.random();t=w.find(x=>(s-=x[1])<0)[0]}
+        let s=w.reduce((a,b)=>a+b[1],0)*rand();t=w.find(x=>(s-=x[1])<0)[0]}
       return{lane:l,t,to:[]}}));
   }
   // 中盤に強敵を最低1つ保証（ご褒美を目の前に吊るす 桜井 #023）
-  if(!fl.some(a=>a.some(n=>n.t==='elite'))){const f=4+rnd(3);pick(fl[f]).t='elite'}
+  if(!fl.some(a=>a.some(n=>n.t==='elite'))){const f=F>=8?4+rnd(3):2+rnd(2);pick(fl[f]).t='elite'}
   for(let f=0;f<F-1;f++)fl[f].forEach(n=>{fl[f+1].forEach((m,j)=>{if(Math.abs(m.lane-n.lane)<=1||fl[f].length===1||fl[f+1].length===1)n.to.push(j)})});
   // 入ってこないノードを救う
   for(let f=1;f<F;f++)fl[f].forEach((m,j)=>{if(!fl[f-1].some(n=>n.to.includes(j))){let best=fl[f-1].reduce((a,b)=>Math.abs(b.lane-m.lane)<Math.abs(a.lane-m.lane)?b:a);best.to.push(j)}});
@@ -554,23 +623,38 @@ function enterNode(n){
   else if(n.t==='event')showEvent();
 }
 const curFloor=()=>run.pos?run.pos.f:0;
+/* 階ごとの舞台：「先を見たい」動機を見せ続ける（桜井 #127） */
+const THEMES={
+  class:{n:'教室',tip:'机にぶつければ衝突ダメージ。穴まで押し出せば一発よ。',rocks:[2,3],pits:[2,4]},
+  gym:{n:'体育館',tip:'ワックスがけの床（光るマス）は滑るわ。押すと1マス余計に進むの。',rocks:[1,2],pits:[1,2],slide:[4,6]},
+  lib:{n:'図書室',tip:'本棚にぶつけると本が崩れて大ダメージ。そのあと本棚は消えるわ。',rocks:[0,1],pits:[2,3],shelf:[3,4]},
+  lab:{n:'理科室',tip:'緑の薬品マスに入ると3ダメージ。敵を押し込むのよ。わたしたちは踏まないこと。',rocks:[1,2],pits:[2,3],haz:[3,4]},
+  roof:{n:'屋上',tip:'屋上は柵がないの。盤の外に押し出せば落ちるわ。…自分も気をつけて。',rocks:[1,1],pits:[0,1],edge:1},
+  boss:{n:'夜の校長室',tip:'鬼校長よ。重いから穴に落としても這い上がってくる。焦らずに。',rocks:[2,2],pits:[3,3]},
+};
+const THEME_SEQ={10:['class','class','gym','gym','lib','lib','lab','lab','roof','boss'],6:['class','gym','lib','lab','roof','boss']};
+const themeOf=f=>{const F=run&&run.map?run.map.length:10;const seq=THEME_SEQ[F]||THEME_SEQ[10];return THEMES[seq[Math.min(f,seq.length-1)]]};
+const themeKey=f=>{const F=run&&run.map?run.map.length:10;const seq=THEME_SEQ[F]||THEME_SEQ[10];return seq[Math.min(f,seq.length-1)]};
 
 /* =====================================================================
    戦闘
    ===================================================================== */
 let B=null,uidc=0;
-function genTerrain(plPos,avoid){
-  for(let tries=0;tries<200;tries++){
+function genTerrain(plPos,avoid,th){
+  th=th||THEMES.class;
+  const rr=r=>r?r[0]+rnd(r[1]-r[0]+1):0;
+  for(let tries=0;tries<300;tries++){
     const g=Array.from({length:N},()=>Array(N).fill(FLOOR));
-    const nR=2+rnd(2),nP=2+rnd(3);
     const cells=[];for(let y=0;y<N-1;y++)for(let x=0;x<N;x++)if(!(x===plPos.x&&y===plPos.y)&&!avoid.some(a=>a.x===x&&a.y===y))cells.push({x,y});
-    shuffle(cells);let k=0;
-    for(let i=0;i<nR;i++){const c=cells[k++];g[c.y][c.x]=ROCK}
-    for(let i=0;i<nP;i++){const c=cells[k++];g[c.y][c.x]=PIT}
-    // 床がすべてつながっているか
+    shuffle(cells);let k=0;const put=(n,v)=>{for(let i=0;i<n&&k<cells.length;i++){const c=cells[k++];g[c.y][c.x]=v}};
+    put(rr(th.rocks),ROCK);put(rr(th.pits),PIT);put(rr(th.shelf),SHELF);put(rr(th.haz),HAZ);
+    if(th.slide){// 滑る床は、自分の周り以外のどこにでも
+      const fl=[];for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(g[y][x]===FLOOR&&man({x,y},plPos)>1)fl.push({x,y});shuffle(fl);
+      fl.slice(0,rr(th.slide)).forEach(c=>g[c.y][c.x]=SLIDE)}
+    // 歩ける床がすべてつながっているか
     const seen=new Set([plPos.x+','+plPos.y]);const q=[plPos];
-    while(q.length){const c=q.shift();for(let d=0;d<4;d++){const nx=c.x+DX[d],ny=c.y+DY[d];if(inB(nx,ny)&&g[ny][nx]===FLOOR&&!seen.has(nx+','+ny)){seen.add(nx+','+ny);q.push({x:nx,y:ny})}}}
-    let total=0;g.forEach(r=>r.forEach(v=>{if(v===FLOOR)total++}));
+    while(q.length){const c=q.shift();for(let d=0;d<4;d++){const nx=c.x+DX[d],ny=c.y+DY[d];if(inB(nx,ny)&&walk(g[ny][nx])&&!seen.has(nx+','+ny)){seen.add(nx+','+ny);q.push({x:nx,y:ny})}}}
+    let total=0;g.forEach(r=>r.forEach(v=>{if(walk(v))total++}));
     if(seen.size===total)return g;
   }
   return Array.from({length:N},()=>Array(N).fill(FLOOR));
@@ -584,7 +668,7 @@ function encounter(kind){
   return pick([['knight','archer','goblin'],['mage','knight','goblin'],['archer','archer','goblin','bomber'],['knight','mage','bomber'],['goblin','goblin','archer','mage']]);
 }
 function makeSpec(kind){
-  if(kind!=='tut'&&A(8)&&kind==='battle'&&Math.random()<.35){const sp=_makeSpec(kind);if(sp.ens.length<4){const free=[];for(let y=0;y<3;y++)for(let x=0;x<N;x++)if(sp.g[y][x]===FLOOR&&!sp.ens.some(e=>e.x===x&&e.y===y))free.push({x,y});if(free.length){const f=pick(free);sp.ens.push({k:'goblin',x:f.x,y:f.y,face:2})}}return sp}
+  if(kind!=='tut'&&A(8)&&kind==='battle'&&rand()<.35){const sp=_makeSpec(kind);if(sp.ens.length<4){const free=[];for(let y=0;y<3;y++)for(let x=0;x<N;x++)if(walk(sp.g[y][x])&&!sp.ens.some(e=>e.x===x&&e.y===y))free.push({x,y});if(free.length){const f=pick(free);sp.ens.push({k:'goblin',x:f.x,y:f.y,face:2})}}return sp}
   return _makeSpec(kind);
 }
 function _makeSpec(kind){
@@ -598,7 +682,7 @@ function _makeSpec(kind){
   const spots=[];for(let y=0;y<3;y++)for(let x=0;x<N;x++)spots.push({x,y});shuffle(spots);
   let ep=ks.map((k,i)=>spots[i]);
   if(kind==='boss'){const b={x:2+rnd(2),y:1};ep=[b].concat(spots.filter(s=>man(s,b)>1).slice(0,ks.length-1))}
-  const g=genTerrain(pl,ep.concat(kind==='boss'?[{x:ep[0].x,y:2}]:[]));
+  const g=genTerrain(pl,ep.concat(kind==='boss'?[{x:ep[0].x,y:2}]:[]),themeOf(curFloor()));
   return{kind,g,pl,ens:ks.map((k,i)=>({k,x:ep[i].x,y:ep[i].y,face:2}))};
 }
 function startBattle(kind,spec){
@@ -606,12 +690,15 @@ function startBattle(kind,spec){
   const snap=JSON.parse(JSON.stringify(run));
   B={spec:JSON.parse(JSON.stringify(spec)),snap,kind:spec.kind,tut:spec.tut?1:0,g:spec.g.map(r=>r.slice()),units:[],
      hand:[],drawP:[],disc:[],exh:[],energy:0,move:0,block:0,turn:0,kairiki:0,sel:-1,focus:null,busy:false,undo:null,dead:false,won:false,msg:''};
+  B.theme=spec.tut?THEMES.class:themeOf(curFloor());B.themeKey=spec.tut?'class':themeKey(curFloor());
   B.pl={uid:++uidc,pl:true,x:spec.pl.x,y:spec.pl.y,hp:run.hp,maxHp:run.maxHp,alive:true,face:0};
   B.units.push(B.pl);
   const f=curFloor();
   for(const e of spec.ens)spawn(e.k,e.x,e.y,false,e.face);
   // 山札
   B.drawP=shuffle(run.deck.map(c=>({...c})));
+  if(isP('yuki'))B.drawP.push({id:'yochi',up:false,temp:1});
+  B.ruruUsed=false;B.chain=0;
   if(B.tut){const order=['tsuki','tsuki','kamae','fumikomi','kamae'];const rest=B.drawP.slice();B.drawP=[];
     for(const id of order){const i=rest.findIndex(c=>c.id===id);if(i>=0)B.drawP.push(rest.splice(i,1)[0])}B.drawP=rest.concat(B.drawP.reverse())}
   buildBattleDom();
@@ -633,8 +720,8 @@ const edmg=d=>d.dmg+Math.floor(curFloor()/P['敵攻撃力が上がる階の間�
 function adjEnemies(){const p=B.pl,r=[];for(let d=0;d<4;d++){const u=unitAt(p.x+DX[d],p.y+DY[d]);if(u&&!u.pl)r.push([u,d])}return r}
 
 /* ---------- 攻撃予告マス ---------- */
-const okT=([x,y])=>inB(x,y)&&B.g[y][x]!==ROCK;
-function lineFrom(x,y,d,stopPit){const r=[];let cx=x,cy=y;for(let i=0;i<N;i++){cx+=DX[d];cy+=DY[d];if(!inB(cx,cy)||B.g[cy][cx]===ROCK)break;if(stopPit&&B.g[cy][cx]===PIT)break;r.push([cx,cy]);if(unitAt(cx,cy))break}return r}
+const okT=([x,y])=>inB(x,y)&&!solid(B.g[y][x]);
+function lineFrom(x,y,d,stopPit){const r=[];let cx=x,cy=y;for(let i=0;i<N;i++){cx+=DX[d];cy+=DY[d];if(!inB(cx,cy)||solid(B.g[cy][cx]))break;if(stopPit&&B.g[cy][cx]===PIT)break;r.push([cx,cy]);if(unitAt(cx,cy))break}return r}
 function intentTiles(e){
   const it=e.intent;if(!it||!e.alive)return[];const f=e.face,x=e.x,y=e.y;
   switch(it.t){
@@ -667,12 +754,12 @@ function bfs(u,mv){
   const res=new Map();res.set(u.x+','+u.y,{x:u.x,y:u.y,d:0,prev:null});const q=[{x:u.x,y:u.y,d:0}];
   while(q.length){const c=q.shift();if(c.d>=mv)continue;
     for(let d=0;d<4;d++){const nx=c.x+DX[d],ny=c.y+DY[d],k=nx+','+ny;
-      if(!inB(nx,ny)||B.g[ny][nx]!==FLOOR||unitAt(nx,ny)||res.has(k))continue;
+      if(!inB(nx,ny)||!walk(B.g[ny][nx])||unitAt(nx,ny)||res.has(k))continue;
       res.set(k,{x:nx,y:ny,d:c.d+1,prev:c.x+','+c.y});q.push({x:nx,y:ny,d:c.d+1})}}
   return res;
 }
 function clearLine(a,b){if(a.x!==b.x&&a.y!==b.y)return false;const d=a.x===b.x?(b.y>a.y?2:0):(b.x>a.x?1:3);
-  let x=a.x,y=a.y;while(true){x+=DX[d];y+=DY[d];if(x===b.x&&y===b.y)return true;if(!inB(x,y)||B.g[y][x]===ROCK||unitAt(x,y))return false}}
+  let x=a.x,y=a.y;while(true){x+=DX[d];y+=DY[d];if(x===b.x&&y===b.y)return true;if(!inB(x,y)||solid(B.g[y][x])||unitAt(x,y))return false}}
 const BOSSSEQ=['sweep','charge','sweep','summon'];
 function score(e,x,y){
   const p=B.pl,m=Math.abs(x-p.x)+Math.abs(y-p.y),ai=e.def.ai;
@@ -687,10 +774,10 @@ async function aiMove(e){
   const d=e.def;if(d.ai==='bomb'&&e.intent&&e.intent.t==='bomb')return;
   if(d.ai==='boss'&&BOSSSEQ[e.cyc%4]==='summon')return;
   const R=bfs(e,d.mv);let best=null,bs=1e9;
-  for(const v of R.values()){const s=score(e,v.x,v.y)+Math.random()*.3+v.d*.01;if(s<bs){bs=s;best=v}}
+  for(const v of R.values()){const s=score(e,v.x,v.y)+rand()*.3+v.d*.01+(B.g[v.y][v.x]===HAZ?3:0);if(s<bs){bs=s;best=v}}
   if(!best||(best.x===e.x&&best.y===e.y))return;
   const path=[];let k=best.x+','+best.y;while(k){const v=R.get(k);path.unshift(v);k=v.prev}
-  for(const v of path.slice(1)){e.x=v.x;e.y=v.y;e.face=faceTo(e,B.pl);place(e);await sleep(70)}
+  for(const v of path.slice(1)){e.x=v.x;e.y=v.y;e.face=faceTo(e,B.pl);place(e);await sleep(70);await enterTile(e);if(!e.alive)return}
 }
 function plan(e,first){
   const d=e.def,p=B.pl;e.face=faceTo(e,p);
@@ -701,7 +788,7 @@ function plan(e,first){
     case'bomb':e.intent=e.cyc>=1?{t:'bomb',dmg:dm}:{t:'fuse'};e.cyc++;break;
     case'mage':{const ts=[[p.x,p.y],[p.x+1,p.y],[p.x-1,p.y],[p.x,p.y+1],[p.x,p.y-1]].filter(okT);e.intent={t:'abs',dmg:dm,tiles:ts};break}
     case'boss':{const ph=BOSSSEQ[e.cyc%4];e.cyc++;
-      if(ph==='summon'){const cand=[];for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(B.g[y][x]===FLOOR&&!unitAt(x,y)&&man({x,y},p)>=2)cand.push({x,y});
+      if(ph==='summon'){const cand=[];for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(walk(B.g[y][x])&&!unitAt(x,y)&&man({x,y},p)>=2)cand.push({x,y});
         cand.sort((a,b)=>man(a,e)-man(b,e));e.intent={t:'summon',tiles:cand.slice(0,2).map(c=>[c.x,c.y])}}
       else if(ph==='charge'){e.intent={t:'charge',dmg:dm+3}}
       else e.intent={t:'sweep',dmg:dm};break}
@@ -716,20 +803,22 @@ function intentText(e){const it=e.intent;if(!it)return'';
 /* ---------- ターン ---------- */
 function startTurn(first){
   B.turn++;run.stats.turns++;
-  B.block=has('tate')?3:0;B.kairiki=0;B.undo=null;
+  B.block=(has('tate')?3:0)+(isP('mio')?4:0);B.kairiki=0;B.undo=null;B.hinaBlk=0;B.chain=0;
   B.energy=P['毎ターンのエネルギー']+(first&&has('hachimaki')?1:0);
-  B.move=P['毎ターンの移動力']+(has('waraji')?1:0);
-  draw(P['手札の枚数']+(has('tenugui')?1:0),true);
+  B.move=P['毎ターンの移動力']+(has('waraji')?1:0)+(isP('hina')?1:0);
+  draw(P['手札の枚数']+(has('tenugui')?1:0)+(isP('yuki')?1:0),true);
   B.busy=false;
   if(!first){banner('あなたの番');sfx('turn')}
   if(B.tut&&B.turn===1)B.tutStep=0;
-  if(first&&B.kind==='boss')say('mio',line('boss'),3200,'normal');
+  if(first&&!B.tut){run.seenTheme=run.seenTheme||{};
+    if(!run.seenTheme[B.themeKey]){run.seenTheme[B.themeKey]=1;banner(B.theme.n);say('mio',B.theme.tip,3600,'normal')}
+    else if(B.turn===1&&curFloor()<=1&&PT()&&PT()!=='mio')say(PT(),MEMBERS[PT()].lines.start,2600)}
   render();
 }
 function draw(n,fresh){
   for(let i=0;i<n;i++){
     if(!B.drawP.length){if(!B.disc.length)break;B.drawP=shuffle(B.disc);B.disc=[]}
-    if(B.hand.length>=10)break;
+    if(B.hand.length>=(isP('yuki')?11:10))break;
     const c=B.drawP.pop();c.fresh=1;B.hand.push(c);
   }
   if(!fresh)render();
@@ -763,7 +852,7 @@ async function enemyAct(e){
   B.acting=e;render();
   if(it.t==='fuse'){await sleep(gap*.4);B.acting=null;return}
   const ts=intentTiles(e);
-  if(it.t==='summon'){sfx('summon');for(const [x,y] of ts)if(B.g[y][x]===FLOOR&&!unitAt(x,y)){const u=spawn('goblin',x,y,true);plan(u)}render();await sleep(gap);B.acting=null;return}
+  if(it.t==='summon'){sfx('summon');for(const [x,y] of ts)if(walk(B.g[y][x])&&!unitAt(x,y)){const u=spawn('goblin',x,y,true);plan(u)}render();await sleep(gap);B.acting=null;return}
   if(it.t==='charge'){
     sfx('big');const d=e.face;
     for(const [x,y] of ts){const o=unitAt(x,y);if(o&&o!==e){await hit(o,it.dmg,e,{big:1});if(o.alive)await push(o,d,1);break}
@@ -807,34 +896,58 @@ async function kill(u){
 }
 function collDmg(){return P['衝突ダメージ']+(has('mawashi')?1:0)+(has('chikaraishi')?2:0)+B.kairiki}
 async function collide(u,o,nx,ny){
-  const cd=collDmg();
+  let cd=collDmg();
+  const shelf=!o&&inB(nx,ny)&&B.g[ny][nx]===SHELF;
+  if(shelf)cd+=3;
   const fx=(u.x+(nx))/2,fy=(u.y+(ny))/2;
-  don(fx,fy,'ドン!');sfx('coll');shake('m');
+  don(fx,fy,shelf?'バサッ!':'ドン!');sfx('coll');shake('m');
   run.stats.maxColl=Math.max(run.stats.maxColl,cd*(o?2:1));if(cd*(o?2:1)>=12)ach('coll12');
   await hit(u,cd,null);
+  if(shelf){B.g[ny][nx]=FLOOR;buildTiles();render()}
   if(o&&o.alive){await hit(o,cd,null);if(!u.pl&&!o.pl){praise('まとめて!');say('akane',line('coll'),1400,'shout')}}
 }
-async function push(u,d,n,pull){
+async function chainBonus(){
+  const n=B.chain||0;B.chain=0;if(n<1||!B||B.dead)return;
+  const k=n+1;META.bestChain=Math.max(META.bestChain||0,k);saveMeta();if(k>=3)ach('chain3');
+  cutin(k+'連鎖っ！','img/cut_akane.webp');gainBlock(k*2);B.energy+=k>=3?1:0;
+  say(PT()&&PT()!=='mio'?PT():'akane',k>=3?'連鎖でエネルギー+1、ブロック+'+k*2+'！':'連鎖ボーナスでブロック+'+k*2+'！',1500,'laugh');
+}
+async function enterTile(u){// 理科室の薬品
+  if(u.alive&&B.g[u.y][u.x]===HAZ){fxEl('don',(u.x+.5)*T,(u.y+.3)*T,'ジュッ!');await hit(u,3,null)}
+}
+async function push(u,d,n,pull,depth=0){
   if(!u||!u.alive||n<=0)return;
   if(u.def&&u.def.heavy)n=Math.min(n,1);
+  let extra=0;
   for(let i=0;i<n;i++){
     const nx=u.x+DX[d],ny=u.y+DY[d];
-    if(!inB(nx,ny)||B.g[ny][nx]===ROCK){if(!pull)await collide(u,null,nx,ny);return}
+    if(!inB(nx,ny)&&B.theme&&B.theme.edge&&!pull){// 屋上：盤の外へ落下
+      u.px=u.x;u.py=u.y;u.x=nx;u.y=ny;place(u);sfx('slide');await sleep(P['押し出し1マスのms']);
+      if(u.pl||(u.def&&u.def.boss)){u.x=u.px;u.y=u.py;place(u)}
+      await fall(u,true);return}
+    if(!inB(nx,ny)||solid(B.g[ny][nx])){if(!pull)await collide(u,null,nx,ny);return}
     const o=unitAt(nx,ny);
-    if(o){if(!pull)await collide(u,o,nx,ny);return}
+    if(o){if(!pull){await collide(u,o,nx,ny);
+        // ドミノ押し：ぶつかった敵も1マス押される（ギュッとしてパッ 桜井 #009）
+        if(o.alive&&!o.pl&&depth<8){B.chain=(B.chain||0)+1;run.stats.maxChain=Math.max(run.stats.maxChain||0,B.chain+1);
+          if(B.chain>=1)fxEl('don',(o.x+.5)*T,(o.y-.1)*T,(B.chain+1)+'連鎖!');
+          await push(o,d,1,false,depth+1)}}
+      return}
     u.px=u.x;u.py=u.y;u.x=nx;u.y=ny;place(u);sfx('slide');await sleep(P['押し出し1マスのms']);
     if(B.g[ny][nx]===PIT){await fall(u);return}
+    await enterTile(u);if(!u.alive)return;
+    if(B.g[ny][nx]===SLIDE&&extra<4&&i===n-1&&!pull){extra++;n++;fxEl('don',(u.x+.5)*T,(u.y+.8)*T,'ツルッ');}
   }
 }
-async function fall(u){
+async function fall(u,edge){
   if(u.pl||(u.def&&u.def.boss)){
     const dmg=u.pl?P['自分が穴に落ちた時のダメージ']:P['ボスが穴に落ちた時のダメージ'];
     sfx('fall');jit(u,'jit',200);await sleep(200);
-    u.x=u.px;u.y=u.py;place(u);
+    if(!edge){u.x=u.px;u.y=u.py;place(u)}
     if(!u.pl){praise('落ちた!');ach('boss_pit')}
     await hit(u,dmg,null,{big:1});return;
   }
-  u.alive=false;run.stats.falls++;sfx('fall');removeEl(u,'fall');cutin('落としたっ！','img/cut_akane.webp');say('akane',line('fall'),1600,'laugh');ach('fall1');if(run.stats.falls>=5)ach('falls5');
+  u.alive=false;run.stats.falls++;sfx('fall');removeEl(u,'fall');cutin('落としたっ！','img/cut_akane.webp');if(PT()&&rand()<.45)say(PT(),MEMBERS[PT()].lines.fall,1500);else say('akane',line('fall'),1600,'laugh');ach('fall1');if(run.stats.falls>=5)ach('falls5');
   if(has('jizo')){heal(3)}
   await sleep(330);render();
 }
@@ -843,12 +956,12 @@ async function throwBack(u,dir){
   if(!u.alive)return;
   if(u.def.heavy){praise('重い!');return}
   const p=B.pl,back=(dir+2)%4,tx=p.x+DX[back],ty=p.y+DY[back];
-  if(!inB(tx,ty)||B.g[ty][tx]===ROCK||unitAt(tx,ty)){await collide(u,unitAt(tx,ty)||null,u.x,u.y);return}
+  if(!inB(tx,ty)||solid(B.g[ty][tx])||unitAt(tx,ty)){await collide(u,unitAt(tx,ty)||null,u.x,u.y);return}
   u.px=u.x;u.py=u.y;u.x=tx;u.y=ty;place(u);u.el.querySelector('.tok').style.transform='translateY(-18px) scale(1.15)';sfx('slide');await sleep(150);
   u.el.querySelector('.tok').style.transform='';shake('s');
   if(B.g[ty][tx]===PIT)await fall(u);
 }
-async function atk(x,d,big){const p=B.pl;await lunge(p,x.dir);if(d>0)await hit(x.u,d,p,{big})}
+async function atk(x,d,big){const p=B.pl;await lunge(p,x.dir);if(d>0)await hit(x.u,d+(isP('rin')?2:0),p,{big})}
 async function shoot(x){const p=B.pl;const el=document.createElement('div');el.className='don';el.textContent='●';el.style.fontSize='16px';
   el.style.left=(p.x+.5)*T+'px';el.style.top=(p.y+.5)*T+'px';el.style.transition='left .12s linear,top .12s linear';$('#fx').appendChild(el);
   sfx('move');await sleep(16);el.style.left=(x.u.x+.5)*T+'px';el.style.top=(x.u.y+.5)*T+'px';await sleep(120);el.remove()}
@@ -861,11 +974,19 @@ function reachMap(){if(B.move<=0)return new Map();const R=bfs(B.pl,B.move);R.del
 function cardTargets(c){
   const d=CARDS[c.id],p=B.pl,rg=crange(c),t=[];
   if(d.t==='adj'){for(let k=0;k<4;k++){const u=unitAt(p.x+DX[k],p.y+DY[k]);if(u&&!u.pl)t.push({x:u.x,y:u.y,u,dir:k})}}
-  else if(d.t==='line'){for(let k=0;k<4;k++){let x=p.x,y=p.y;for(let i=0;i<rg;i++){x+=DX[k];y+=DY[k];if(!inB(x,y)||B.g[y][x]===ROCK)break;const u=unitAt(x,y);if(u){if(!u.pl)t.push({x,y,u,dir:k});break}}}}
+  else if(d.t==='line'){for(let k=0;k<4;k++){let x=p.x,y=p.y;for(let i=0;i<rg;i++){x+=DX[k];y+=DY[k];if(!inB(x,y)||solid(B.g[y][x]))break;const u=unitAt(x,y);if(u){if(!u.pl)t.push({x,y,u,dir:k});break}}}}
   else if(d.t==='near'){for(const e of enemies())if(man(e,p)<=rg)t.push({x:e.x,y:e.y,u:e})}
   else if(d.t==='tile'||d.t==='any'){for(let y=0;y<N;y++)for(let x=0;x<N;x++){if(man({x,y},p)>rg||(x===p.x&&y===p.y))continue;const u=unitAt(x,y);
-    if(B.g[y][x]===FLOOR&&!u)t.push({x,y});else if(d.t==='any'&&u&&!u.pl)t.push({x,y,u})}}
+    if(walk(B.g[y][x])&&!u)t.push({x,y});else if(d.t==='any'&&u&&!u.pl)t.push({x,y,u})}}
+  if(c.id==='iwaotoshi')return t.filter(o=>o.u||keepsLinked(o.x,o.y));// 机で盤を分断して詰ませない
   return t;
+}
+function keepsLinked(bx,by){
+  const ok=(x,y)=>inB(x,y)&&!(x===bx&&y===by)&&walk(B.g[y][x]);
+  const all=[];for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(ok(x,y))all.push(x+','+y);
+  if(!all.length)return false;const st=B.pl.x+','+B.pl.y;const seen=new Set([st]);const q=[[B.pl.x,B.pl.y]];
+  while(q.length){const [x,y]=q.shift();for(let d=0;d<4;d++){const nx=x+DX[d],ny=y+DY[d],k=nx+','+ny;if(ok(nx,ny)&&!seen.has(k)){seen.add(k);q.push([nx,ny])}}}
+  return all.every(k=>seen.has(k));
 }
 function playable(c){if(CARDS[c.id].t==='none')return'使えないカード';if(ccost(c)>B.energy)return'エネルギーが足りない';const d=CARDS[c.id];if(d.t==='self')return d.adj&&!adjEnemies().length?'隣に敵がいない':'';
   return cardTargets(c).length?'':'届く敵がいない'}
@@ -875,8 +996,11 @@ async function playCard(i,tg){
   B.busy=true;B.sel=-1;B.undo=null;B.focus=null;
   B.energy-=ccost(c);B.hand.splice(i,1);sfx('card');
   render();
+  B.chain=0;
+  META.seen[c.id]=1;
   await CARDS[c.id].fx(tg||{},cv(c));
-  if(CARDS[c.id].ex)B.exh.push(c);else B.disc.push(c);
+  await chainBonus();
+  if(CARDS[c.id].ex||c.temp)B.exh.push(c);else B.disc.push(c);
   if(B.tut&&B.tutStep<2&&run.stats.falls>0)B.tutStep=2;
   if(B.dead){return gameOver()}
   if(checkWin())return;
@@ -886,8 +1010,9 @@ async function movePl(x,y){
   const R=reachMap();const v=R.get(x+','+y);if(!v)return;
   B.busy=true;B.undo={x:B.pl.x,y:B.pl.y,move:B.move};
   const path=[];let k=x+','+y;while(k&&k!==B.pl.x+','+B.pl.y){const s=R.get(k);path.unshift(s);k=s.prev}
-  for(const s of path){B.pl.x=s.x;B.pl.y=s.y;place(B.pl);sfx('move');await sleep(65)}
+  for(const s of path){B.pl.x=s.x;B.pl.y=s.y;place(B.pl);sfx('move');await sleep(65);await enterTile(B.pl);if(B.dead)return gameOver()}
   B.move-=v.d;B.busy=false;
+  if(isP('hina')&&adjEnemies().length&&!B.hinaBlk){B.hinaBlk=1;gainBlock(2)}
   if(B.tut&&B.tutStep===0)B.tutStep=1;
   render();
 }
@@ -903,11 +1028,11 @@ function checkWin(){
 let T=56;
 function buildBattleDom(){
   T=Math.floor(Math.min(64,(Math.min(app.clientWidth,480)-20)/N,(app.clientHeight-432)/N));T=Math.max(T,40);
-  app.innerHTML=`<div class="scr ${B.kind==='boss'?'boss':''}" id="bscr" style="overflow:hidden">${hudHtml(true)}
-    <div id="bwrap"><div id="board" style="--T:${T}px"><div id="tiles"></div><div id="units"></div><div id="fx"></div></div></div>
+  app.innerHTML=`<div class="scr th-${B.themeKey}" id="bscr" style="overflow:hidden">${hudHtml(true)}
+    <div id="bwrap"><div id="board" class="${B.theme.edge?'edge':''}" style="--T:${T}px"><div id="tiles"></div><div id="units"></div><div id="fx"></div></div></div>
     <div class="talk"><img class="face" id="face" src="${FACE.akane.smile}" alt=""><div class="info"><div class="who" id="who">アカネ</div><div id="info"></div></div></div>
     <div class="ctrl"><div class="orb" id="orb"></div><div class="mv" id="mv"></div><div class="sp"></div>
-      <button class="sub" id="pile" style="font-size:12px;padding:8px 8px">山札</button><button class="sub" id="undo">↶</button><button id="endt">ターン終了</button></div>
+      <button class="sub" id="pile" style="font-size:12px;padding:8px 8px">山札</button><button class="sub" id="undo">↶</button>${isP('ruru')?'<button class="sub" id="ruru" style="font-size:12px;padding:8px 8px">穴</button>':''}<button id="endt">ターン終了</button></div>
     <div class="hand" id="hand"></div>${DEBUG?'<div class="dbg"><button id="dw">勝つ</button><button id="de">E+3</button><button id="dsp">速</button></div>':''}</div><div id="modal"></div>`;
   document.documentElement.style.setProperty('--T',T+'px');
   B.dom=true;buildTiles();
@@ -915,6 +1040,7 @@ function buildBattleDom(){
   hudBind();
   $('#endt').onclick=()=>{ac();endTurn()};
   $('#undo').onclick=()=>undoMove();
+  if($('#ruru'))$('#ruru').onclick=()=>{if(B.busy||B.ruruUsed)return;B.ruruSel=!B.ruruSel;B.sel=-1;say('ruru',B.ruruSel?'どこに穴をあける〜？ 空いてるマスをタップ！':'やめとく〜',1600);render()};
   $('#pile').onclick=()=>showPiles();
   $('#tiles').onclick=ev=>{const t=ev.target.closest('.tile');if(t)tapTile(+t.dataset.x,+t.dataset.y)};
   $('#hand').onclick=ev=>{const c=ev.target.closest('.card');if(c)tapCard(+c.dataset.i)};
@@ -922,7 +1048,7 @@ function buildBattleDom(){
 }
 function buildTiles(){
   const h=[];for(let y=0;y<N;y++)for(let x=0;x<N;x++){const v=B.g[y][x];
-    h.push(`<div class="tile ${v===ROCK?'r':v===PIT?'p':'f'+((x+y)%2?' alt':'')}" data-x="${x}" data-y="${y}" style="left:${x*T}px;top:${y*T}px"><div class="dz"></div><span class="dn"></span></div>`)}
+    h.push(`<div class="tile ${v===ROCK?'r':v===PIT?'p':v===SHELF?'sh':'f'+((x+y)%2?' alt':'')+(v===SLIDE?' sl':v===HAZ?' hz':'')}" data-x="${x}" data-y="${y}" style="left:${x*T}px;top:${y*T}px"><div class="dz"></div><span class="dn"></span></div>`)}
   $('#tiles').innerHTML=h.join('');
 }
 function mkUnitEl(u){
@@ -945,7 +1071,7 @@ function flash(){const b=$('#board');if(!b)return;const el=document.createElemen
 function praise(t){const s=$('#bscr')||app;const el=document.createElement('div');el.className='praise';el.textContent=t;
   const b=$('#bwrap');if(b){el.style.top=(b.offsetTop+b.offsetHeight*.45)+'px'}s.appendChild(el);setTimeout(()=>el.remove(),950)}
 function banner(t,cls){const s=$('#bscr');if(!s)return;const el=document.createElement('div');el.className='banner '+(cls||'');el.textContent=t;s.appendChild(el);setTimeout(()=>el.remove(),600)}
-function say(who,t,ms=1600,mood){if(!B)return;B.say={who,t,mood};clearTimeout(B.sayT);B.sayT=setTimeout(()=>{if(B&&B.say&&B.say.t===t){B.say=null;render()}},ms*SPEED);render()}
+function say(who,t,ms=1600,mood){if(!B)return;if(who!=='akane'&&who!=='mio'&&!MEMBERS[who])who='akane';B.say={who,t,mood};clearTimeout(B.sayT);B.sayT=setTimeout(()=>{if(B&&B.say&&B.say.t===t){B.say=null;render()}},ms*SPEED);render()}
 let lastCut=0;
 function cutin(t,face){face=face&&!face.includes('/')?FACE.akane[face]:face;const now=Date.now();if(now-lastCut<500)return;lastCut=now;const b=$('#bwrap');if(!b)return;
   const el=document.createElement('div');el.className='cutin';el.style.top=(b.offsetTop+b.offsetHeight*.38)+'px';
@@ -955,6 +1081,7 @@ function msg(t){B.msg=t;render();setTimeout(()=>{if(B&&B.msg===t){B.msg='';rende
 function tapTile(x,y){
   if(!B||B.busy||B.won||B.dead)return;ac();
   const p=B.pl,u=unitAt(x,y);
+  if(B.ruruSel){if(!u&&walk(B.g[y][x])){B.ruruSel=false;B.ruruUsed=true;B.g[y][x]=PIT;sfx('boom');shake('m');buildTiles();say('ruru','ぽっかーん♪',1400);render()}else{B.ruruSel=false;render()}return}
   if(B.sel>=0){
     const c=B.hand[B.sel];const d=CARDS[c.id];
     if(d.t==='self'&&u===p)return playCard(B.sel);
@@ -997,6 +1124,7 @@ function render(){
     if(R.has(k)&&!unitAt(x,y))el.classList.add('rc');
     if(tg.some(t=>t.x===x&&t.y===y))el.classList.add('tg');
     if(B.sel>=0&&CARDS[B.hand[B.sel].id].t==='self'&&x===p.x&&y===p.y)el.classList.add('tg');
+    if(B.ruruSel&&walk(B.g[y][x])&&!unitAt(x,y))el.classList.add('tg');
   });
   // 駒
   const es=enemies();
@@ -1024,12 +1152,13 @@ function render(){
   else{const pr=predicted();h=pr?`このままだと <b>${Math.max(0,pr-B.block)}ダメージ</b>${B.block?`（ブロック${B.block}で軽減）`:''}もらっちゃう！ 赤いマスから出るか、守ろっ`:'敵をタップすると何してくるか分かるよ。光るマスで移動、カードで攻撃！'}
   $('#info').innerHTML=h;
   const fc=$('#face'),wl=$('#who');const src=faceSrc(who,mood);if(fc.getAttribute('src')!==src)fc.setAttribute('src',src);
-  fc.classList.toggle('mio',who==='mio');wl.textContent=who==='mio'?'会長・ミオ':'アカネ';wl.classList.toggle('mio',who==='mio');
+  fc.classList.toggle('mio',who==='mio');wl.textContent=who==='akane'?'アカネ':MEMBERS[who].n.slice(2)+(who==='mio'?'（会長）':'');wl.classList.toggle('mio',who!=='akane');
+  fc.style.borderColor=who==='akane'?'':MEMBERS[who].col;wl.style.color=who==='akane'?'':MEMBERS[who].col;
   // 操作
   const orb=$('#orb');orb.textContent=`${B.energy}/${P['毎ターンのエネルギー']}`;orb.classList.toggle('z',B.energy<=0);
   $('#mv').innerHTML=`👣${B.move}`;
   $('#pile').textContent=`山${B.drawP.length}/捨${B.disc.length}`;
-  $('#undo').disabled=!B.undo||B.busy;
+  $('#undo').disabled=!B.undo||B.busy;if($('#ruru')){$('#ruru').disabled=B.ruruUsed||B.busy;$('#ruru').classList.toggle('on',!!B.ruruSel)}
   const anyPlay=B.hand.some(c=>!playable(c));
   $('#endt').classList.toggle('hl',!anyPlay&&!B.busy);$('#endt').disabled=B.busy;
   // 手札
@@ -1078,6 +1207,8 @@ function showHelp(){modal(`<h3>遊び方</h3><div class="howto" style="max-width
   <p>↔️ 敵の攻撃は<b>敵の向き</b>で決まる。押したり入れ替えたりすると攻撃の向きもずれる → <b>敵同士で当てられる</b>。</p>
   <p>💥 押した敵が机（岩）・壁・他の駒にぶつかると<b>衝突ダメージ</b>（両方に）。</p>
   <p>👣 毎ターン2マス歩ける（無料）。⚡ カードはエネルギーを使う。🛡 ブロックは次のターンのはじめに消える。</p>
+  <p>🔗 押した敵が別の敵にぶつかると、その敵も1マス押される（ドミノ押し）。連鎖するとブロックやエネルギーがもらえる。</p>
+  <p>🏫 階ごとに舞台が変わる：体育館は滑る床、図書室は崩れる本棚、理科室は薬品、屋上は盤の外へ落とせる。</p>
   <p>🟪 紫＝場所が固定の雷。🟧 オレンジ＝自爆の範囲。🟩 緑＝手下が出てくる所。</p>
   <p>敵をタップすると、性格と次の行動が見られる。</p></div>
   ${B&&B.dom?'<button class="sub" onclick="closeModal();giveUp()">あきらめる</button>':''}<button onclick="closeModal()">閉じる</button>`)}
@@ -1089,13 +1220,15 @@ window.giveUp=()=>{if(B&&!B.busy){B.pl.hp=0;B.dead=true;gameOver()}};
 function rollCards(n,elite){
   const w=elite?{c:40,u:45,r:15}:{c:60,u:32,r:8};
   const pool=Object.keys(CARDS).filter(k=>CARDS[k].r!=='s'&&CARDS[k].r!=='x'&&cardOK(k));const out=[];
-  while(out.length<n){let s=Math.random()*100;const r=s<w.c?'c':s<w.c+w.u?'u':'r';const cs=pool.filter(k=>CARDS[k].r===r&&!out.includes(k));if(cs.length)out.push(pick(cs))}
-  return out.map(id=>({id,up:Math.random()<.08}));
+  const pc=PT()?MEMBERS[PT()].cards.filter(k=>pool.includes(k)):[];
+  if(pc.length&&rand()<.55){out.push(pick(pc))}  // 相棒の技が出やすい
+  while(out.length<n){let s=rand()*100;const r=s<w.c?'c':s<w.c+w.u?'u':'r';const cs=pool.filter(k=>CARDS[k].r===r&&!out.includes(k));if(cs.length)out.push(pick(cs))}
+  return out.map(id=>({id,up:rand()<.08}));
 }
 function rollRelic(){const own=run.relics;const c=Object.keys(RELICS).filter(k=>k!=='mawashi'&&!own.includes(k));return c.length?pick(c):null}
 function gainGold(n){n=Math.round(n*(has('maneki')?1.5:1)*(A(5)?.8:1));run.gold+=n;sfx('coin');return n}
 function winBattle(){
-  const kind=B.kind;
+  const kind=B.kind;if(B.tut){META.tutDone=1;saveMeta()}
   if(!B.hurt)ach('nohit');if(kind==='elite')ach('elite');
   if(has('yakusou'))run.hp=Math.min(run.maxHp,run.hp+5);
   run.floorsDone=curFloor()+1;
@@ -1167,6 +1300,9 @@ function showEvent(){B=null;
    ===================================================================== */
 function scoreOf(win){const s=run.stats;return Math.round((run.floorsDone*100+s.falls*15+s.ff*25+s.kills*5+(win?1000:0)-run.retries*80)*(1+.1*(run.asc||0)))}
 function rankOf(sc){return sc>=1700?'S':sc>=1200?'A':sc>=700?'B':'C'}
+/* スコアは部の称号で見せる（桜井 #003 スコアの見せ方） */
+const CLUB=[[0,'帰宅部'],[400,'同好会'],[800,'地区大会出場'],[1200,'県大会出場'],[1700,'全国大会出場'],[2400,'伝説の部長']];
+const clubOf=sc=>CLUB.filter(c=>sc>=c[0]).pop()[1];
 function gameOver(){
   B.busy=true;const snap=B.snap,spec=B.spec;
   setTimeout(()=>showEnd(false,snap,spec),400);
@@ -1174,51 +1310,91 @@ function gameOver(){
 function showEnd(win,snap,spec){
   clearRun();
   if(!run.metaDone){run.metaDone=1;META.kills+=run.stats.kills;META.falls+=run.stats.falls;META.ff+=run.stats.ff;
-    if(win){META.wins++;ach('win1');if(run.asc>=5)ach('asc5');if(run.asc>=10)ach('asc10');if(run.deck.length<=8)ach('thin');
+    const pk=PT()||'mio';const gain=run.floorsDone+(win?5:0);run.bondGain=gain;META.bond[pk]=(META.bond[pk]||0)+gain;
+    if(win){META.memWins=META.memWins||{};META.memWins[pk]=1;if(Object.keys(MEMBERS).every(k=>META.memWins[k]))ach('allmem')}
+    if(run.mode==='daily'){const d=META.daily[run.day]||{};const first=win&&!d.done;
+      META.daily[run.day]={done:d.done||win,score:Math.max(d.score||0,scoreOf(win))};
+      if(first){run.dailyFirst=1;META.bond[pk]+=3;if(Object.values(META.daily).filter(x=>x.done).length>=3)ach('daily3')}}
+    if(win&&run.mode!=='daily'){META.wins++;ach('win1');if(run.asc>=5)ach('asc5');if(run.asc>=10)ach('asc10');if(run.deck.length<=8)ach('thin');
       if((run.asc||0)>=(META.ascOpen||0)&&META.ascOpen<10){META.ascOpen=(run.asc||0)+1;META.asc=META.ascOpen;run.ascUp=META.ascOpen}}
     if(META.kills>=100)ach('kills100');saveMeta()}
   const na=(run.newAch||[]).map(id=>ACH.find(a=>a.id===id));
   const sc=scoreOf(win),rk=rankOf(sc),s=run.stats;
-  const best=ls.get('oshidashi.best',{score:0});const nb=sc>best.score;if(nb)ls.set('oshidashi.best',{score:sc,floor:run.floorsDone,win,rank:rk});
-  const reach=win?'鬼校長を倒した！':`${run.pos?run.pos.f+1:1}階で力尽きた`;
+  const best=ls.get('oshidashi.best',{score:0});const nb=run.mode!=='daily'&&sc>best.score;if(nb)ls.set('oshidashi.best',{score:sc,floor:run.floorsDone,win,rank:rk});
+  const pm=MEMBERS[PT()||'mio'];
+  const reach=(run.mode==='daily'?'今日の放課後：':'')+(win?'鬼校長を倒した！':`${run.pos?run.pos.f+1:1}階で力尽きた`);
   app.innerHTML=`<div class="scr"><div class="panel"><h2>${win?'優勝！':'負けた…'}</h2>
     <p style="text-align:center;font-weight:800">${reach}</p>
     <img class="cg" src="img/${win?'cg_selfie':'cg_sunset'}.webp" alt="">
     <p style="text-align:center;font-weight:700;margin-top:-4px">${win?'「やったー！ 優勝だよ、会長！」':'「次は作戦を変えましょう。…まだいけるわね、アカネ？」'}</p>
-    <div class="rank">${rk}</div><p style="text-align:center">スコア ${sc}${nb?' <b style="color:var(--gold)">自己ベスト！</b>':''}</p>
+    <div class="rank">${rk}</div><p style="text-align:center;font-weight:800;font-size:18px;color:var(--gold);margin-top:-6px">${clubOf(sc)}</p>
+    <p style="text-align:center">スコア ${sc}${nb?' <b style="color:var(--gold)">自己ベスト！</b>':''}</p>
+    <div class="rew"><img src="${pm.face}" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:3px solid ${pm.col}"><div>${pm.n}との絆 +${run.bondGain||0}${run.dailyFirst?'（今日の放課後 初クリア +3）':''}<br><small>累計 ${META.bond[PT()||'mio']||0}　${pm.lines.win&&win?'「'+pm.lines.win+'」':''}</small></div></div>
     ${run.ascUp?`<div class="rew" style="background:#4a1d10">🔥 本気度${run.ascUp}が解放された！（${ASC[run.ascUp]}）</div>`:''}
     ${na.length?`<div class="stats"><b>今回の実績</b><br>${na.map(a=>`${a.ic} ${a.n}${a.un?`（技「${CARDS[a.un].n}」解放）`:''}`).join('<br>')}</div>`:''}
-    <div class="stats">${run.asc?`本気度 ${run.asc}（スコア×${(1+.1*run.asc).toFixed(1)}）<br>`:''}倒した敵 ${s.kills}　<br>穴に落とした ${s.falls}（×15）<br>同士討ち ${s.ff}（×25）<br>いちばん痛い衝突 ${s.maxColl}<br>やり直し ${run.retries}回</div>
+    <div class="stats">${run.asc?`本気度 ${run.asc}（スコア×${(1+.1*run.asc).toFixed(1)}）<br>`:''}最大連鎖 ${s.maxChain||0}<br>倒した敵 ${s.kills}　<br>穴に落とした ${s.falls}（×15）<br>同士討ち ${s.ff}（×25）<br>いちばん痛い衝突 ${s.maxColl}<br>やり直し ${run.retries}回</div>
     ${!win&&snap?`<button id="retry">この戦闘をやり直す</button>`:''}
     <button class="${!win&&snap?'sub':''}" id="again">最初から</button><button class="sub" id="tt">タイトルへ</button></div></div>`;
   if(win){sfx('win');confetti()}
   if($('#retry'))$('#retry').onclick=()=>{const na2=run.newAch;run=snap;run.newAch=na2;run.retries++;startBattle(spec.kind,spec)};
-  $('#again').onclick=()=>{newRun();run.pos={f:0,i:0};startBattle('tut')};
+  $('#again').onclick=()=>showSelect(run.mode||'full');
   $('#tt').onclick=()=>showTitle();
 }
+function memberCard(k,sel){const m=MEMBERS[k];const ok=memberOK(k);
+  return `<button class="mem ${ok?'':'lock'}" data-k="${k}" style="--mc:${m.col}"><img src="${m.face}" alt=""><div><b>${ok?m.n:'？？？'}</b> <span style="font-size:12px;color:${m.col};font-weight:800">${m.role}</span>
+   <small>${ok?m.perk:'解放条件：'+m.unlock.tx}</small>${ok?`<span class="bd">絆 ${META.bond[k]||0}${META.memWins&&META.memWins[k]?'　🏆':''}</span>`:''}</div></button>`}
+function showSelect(mode){
+  B=null;
+  app.innerHTML=`<div class="scr"><div class="panel"><h2 style="font-size:24px">${mode==='daily'?'今日の放課後':'相棒を選ぶ'}</h2>
+    <p style="text-align:center;font-size:13px;color:var(--muted)">${mode==='daily'?'今日だけの6階。毎日同じ盤面で、初クリアで絆+3。':'選んだ部員の技が出やすくなり、固有の力が付きます。'}</p>
+    ${Object.keys(MEMBERS).map(k=>memberCard(k)).join('')}
+    <button class="sub" id="back">もどる</button></div></div><div id="modal"></div>`;
+  document.querySelectorAll('.mem').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(!memberOK(k)){sfx('bad');return}
+    ac();sfx('win');newRun(k,mode);run.pos={f:0,i:0};startBattle('battle')});
+  $('#back').onclick=()=>showTitle();
+}
+function showMembers(){
+  modal(`<h3>おしだし部 部員名簿</h3>${['akane'].concat(Object.keys(MEMBERS)).map(k=>{
+    if(k==='akane')return `<div class="prof"><img src="img/akane.webp" alt=""><div><b>押切アカネ</b> <small style="color:#ff7a3d">主人公</small><ul style="padding-left:18px;margin:6px 0;font-size:13px">
+      <li>押し出し担当。とにかく前に出る。</li><li>白い鉢巻は中学の部活の先輩からもらった。</li><li>好物はたこ焼き。</li></ul></div></div>`;
+    const m=MEMBERS[k],ok=memberOK(k),b=META.bond[k]||0;if(!ok)return memberCard(k);
+    const th=[0,5,15];
+    return `<div class="prof"><img src="${m.full}" alt=""><div><b>${m.n}</b> <small style="color:${m.col}">${m.role}</small>　<small class="bd" style="color:var(--gold)">絆 ${b}</small>
+      <ul style="padding-left:18px;margin:6px 0;font-size:13px">${m.prof.map((t,i)=>b>=th[i]?`<li>${t}</li>`:`<li class="lk">🔒 絆${th[i]}で解放</li>`).join('')}</ul><small style="color:var(--muted)">${m.perk}</small></div></div>`}).join('<hr style="border:0;border-top:1px solid #fff2;margin:4px 0">')}
+    <button onclick="closeModal()">閉じる</button>`)}
+function showZukan(){
+  const ids=Object.keys(CARDS).filter(k=>k!=='mayoi');const n=ids.filter(k=>META.seen[k]).length;
+  modal(`<h3>技の図鑑 ${n}/${ids.length}</h3><p style="font-size:12px;color:var(--muted);margin:0">戦闘で一度使うと登録されます。</p>
+    <div class="zk">${ids.map(id=>META.seen[id]?cardHtml({id,up:false}):`<div class="card unk ${CARDS[id].k} r${RAR[CARDS[id].r]}">${cardInner({id,up:false})}</div>`).join('')}</div>
+    <button onclick="closeModal()">閉じる</button>`)}
 function showAch(){
   modal(`<h3>実績 ${ACH.filter(a=>META.ach[a.id]).length}/${ACH.length}</h3>
    ${ACH.map(a=>`<div class="ach ${META.ach[a.id]?'':'no'}"><span class="i">${META.ach[a.id]?a.ic:'🔒'}</span><div><b>${a.n}</b><br>${a.d}${a.un?`<br><small>→ 技「${CARDS[a.un].n}」が出るように</small>`:''}</div></div>`).join('')}
    <div class="stats">挑戦 ${META.runs}回　優勝 ${META.wins}回<br>累計：倒した敵 ${META.kills}・穴落とし ${META.falls}・同士討ち ${META.ff}<br>解放した本気度 ${META.ascOpen}/10</div>
    <button onclick="closeModal()">閉じる</button>`);
 }
-function confetti(){for(let i=0;i<60;i++){const el=document.createElement('div');el.className='conf';el.style.left=Math.random()*100+'%';
-  el.style.background=pick(['#f2c14e','#e94d4a','#4fa3ff','#5fcf8f','#fff']);el.style.animationDuration=(1.6+Math.random()*1.6)+'s';el.style.animationDelay=Math.random()*.6+'s';app.appendChild(el);setTimeout(()=>el.remove(),4000)}}
+function confetti(){for(let i=0;i<60;i++){const el=document.createElement('div');el.className='conf';el.style.left=rand()*100+'%';
+  el.style.background=pick(['#f2c14e','#e94d4a','#4fa3ff','#5fcf8f','#fff']);el.style.animationDuration=(1.6+rand()*1.6)+'s';el.style.animationDelay=rand()*.6+'s';app.appendChild(el);setTimeout(()=>el.remove(),4000)}}
 function showTitle(){
   B=null;
-  const saved=ls.get('oshidashi.run',null);const best=ls.get('oshidashi.best',null);
+  const saved=ls.get('oshidashi.run',null);const best=ls.get('oshidashi.best',null);const dd=META.daily[todayKey()];
   app.innerHTML=`<div class="scr title">
     <div class="girls"><img class="mio" src="${IMG.mio}" alt="生徒会長・天道ミオ"><img class="akane" src="${IMG.akane}" alt="押切アカネ"></div><div class="shade"></div>
     <div class="logo"><svg class="petal" viewBox="0 0 24 24" style="left:9%;top:-4px;transform:rotate(-20deg)" aria-hidden="true"><g fill="#ffc2d4" stroke="#fff" stroke-width="1.2"><ellipse cx="12" cy="6" rx="3.6" ry="5.5"/><ellipse cx="12" cy="6" rx="3.6" ry="5.5" transform="rotate(72 12 12)"/><ellipse cx="12" cy="6" rx="3.6" ry="5.5" transform="rotate(144 12 12)"/><ellipse cx="12" cy="6" rx="3.6" ry="5.5" transform="rotate(216 12 12)"/><ellipse cx="12" cy="6" rx="3.6" ry="5.5" transform="rotate(288 12 12)"/></g><circle cx="12" cy="12" r="2.2" fill="#ffd23f"/></svg><svg class="petal" viewBox="0 0 24 24" style="right:7%;top:54px;width:20px;height:20px;transform:rotate(30deg)" aria-hidden="true"><g fill="#ffc2d4" stroke="#fff" stroke-width="1.2"><ellipse cx="12" cy="6" rx="3.6" ry="5.5"/><ellipse cx="12" cy="6" rx="3.6" ry="5.5" transform="rotate(72 12 12)"/><ellipse cx="12" cy="6" rx="3.6" ry="5.5" transform="rotate(144 12 12)"/><ellipse cx="12" cy="6" rx="3.6" ry="5.5" transform="rotate(216 12 12)"/><ellipse cx="12" cy="6" rx="3.6" ry="5.5" transform="rotate(288 12 12)"/></g><circle cx="12" cy="12" r="2.2" fill="#ffd23f"/></svg><h1><span>オ</span><span>シ</span><span>ダ</span><span>シ</span><span class="ex">！</span></h1><div class="club">放課後おしだし部</div></div>
     <div class="tag">押して、ぶつけて、落とせ。</div>
     ${META.ascOpen?`<div class="asc"><button class="sub" id="am">−</button><span>本気度 <span id="av">${META.asc}</span>　<small id="ad" style="color:var(--muted);font-weight:600"></small></span><button class="sub" id="ap">＋</button></div>`:'<div class="best">優勝すると「本気度」が解放される</div>'}
-    <div class="btns"><button id="go">はじめる</button>${saved&&saved.ver===1?'<button class="sub" id="cont">つづきから</button>':''}
-      <button class="sub" id="achb">実績 ${ACH.filter(a=>META.ach[a.id]).length}/${ACH.length}</button><button class="sub" id="how">遊び方</button></div>
+    <div class="btns"><button id="go" class="modebtn">部活をはじめる<small>全10階・鬼校長まで（15〜30分）</small></button>
+      <button class="sub modebtn" id="daily" style="${dd&&dd.done?'':'background:#2f5a48'}">今日の放課後${dd&&dd.done?' ✓':''}<small>${dd&&dd.done?'今日はクリア済み（何度でも遊べる）':'全6階・日替わり（5〜10分）'}</small></button>
+      ${saved&&saved.ver===1?'<button class="sub" id="cont">つづきから</button>':''}
+      <div style="display:flex;gap:8px"><button class="sub" id="memb" style="flex:1">部員</button><button class="sub" id="zkb" style="flex:1">図鑑 ${Object.keys(META.seen).filter(k=>CARDS[k]&&k!=='mayoi').length}/24</button></div>
+      <div style="display:flex;gap:8px"><button class="sub" id="achb" style="flex:1">実績 ${ACH.filter(a=>META.ach[a.id]).length}/${ACH.length}</button><button class="sub" id="how" style="flex:1">遊び方</button></div></div>
     <div class="best">${best?`自己ベスト ${best.score}（${best.rank}）${best.win?' 優勝':` ${best.floor}階まで`}`:'デッキ構築 × マス目タクティクス'}</div>
   </div><div id="modal"></div>`;
   // 最初の3分で面白さを（桜井 #017）：説明画面を挟まず、いきなり1戦目（チュートリアル込み）
-  $('#go').onclick=()=>{ac();sfx('win');newRun();run.pos={f:0,i:0};startBattle('tut')};
-  if($('#cont'))$('#cont').onclick=()=>{ac();run=saved;showMap()};
+  $('#go').onclick=()=>{ac();sfx('win');if(!META.tutDone){newRun('mio','full');run.pos={f:0,i:0};startBattle('tut')}else showSelect('full')};
+  $('#daily').onclick=()=>{ac();sfx('card');showSelect('daily')};
+  $('#memb').onclick=()=>showMembers();$('#zkb').onclick=()=>showZukan();
+  if($('#cont'))$('#cont').onclick=()=>{ac();run=saved;RNG=Math.random;showMap()};
   $('#how').onclick=()=>showHelp();
   $('#achb').onclick=()=>showAch();
   if($('#am')){const upd=()=>{$('#av').textContent=META.asc;$('#ad').textContent=META.asc?'（'+ASC[META.asc]+' ほか）':'（ふつう）';saveMeta()};upd();
@@ -1232,7 +1408,7 @@ window.autoStep=async function(){
   for(let i=0;i<B.hand.length;i++){const c=B.hand[i];if(playable(c))continue;const d=CARDS[c.id];
     if(d.t==='self'){await playCard(i);return true}const t=cardTargets(c);if(t.length){await playCard(i,pick(t));return true}}
   const R=[...reachMap().values()].filter(v=>!unitAt(v.x,v.y));
-  if(R.length&&B.move>0&&Math.random()<.7){const v=pick(R);await movePl(v.x,v.y);return true}
+  if(R.length&&B.move>0&&rand()<.7){const v=pick(R);await movePl(v.x,v.y);return true}
   await endTurn();return true;
 };
 showTitle();

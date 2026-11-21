@@ -32,10 +32,14 @@ button:active{transform:translateY(2px);box-shadow:0 1px 0 #8a6a1c}
 button.sub{background:#4a3f33;color:var(--fg);box-shadow:0 3px 0 #2a231c}
 button:disabled{opacity:.4}
 .scr{flex:1;display:flex;flex-direction:column;overflow:auto}
+#bscr{background:linear-gradient(rgba(19,32,27,.78),rgba(19,32,27,.94)),url(img/bg_class.webp) center/cover}
+#bscr.boss{background:linear-gradient(rgba(10,14,30,.72),rgba(10,14,30,.92)),url(img/bg_night.webp) center/cover}
+.mapw{background:linear-gradient(rgba(19,32,27,.55),rgba(19,32,27,.8)),url(img/bg_sakura.webp) center/cover fixed}
+.cg{display:block;width:100%;max-width:340px;margin:0 auto;border-radius:12px;border:3px solid #f6efe2;box-shadow:0 8px 20px #000a;transform:rotate(-1.5deg)}
 
 /* タイトル */
 .title{position:relative;align-items:center;justify-content:flex-end;gap:12px;text-align:center;padding:20px 20px 28px;overflow:hidden;
-  background:radial-gradient(120% 70% at 50% 30%,#7a2533 0,#3a1a24 45%,#13201b 85%)}
+  background:radial-gradient(120% 70% at 50% 30%,rgba(122,37,51,.55) 0,rgba(58,26,36,.8) 45%,#13201b 85%),url(img/bg_sakura.webp) center top/cover}
 .title .girls{position:absolute;left:0;right:0;top:70px;bottom:210px;pointer-events:none}
 .title .girls img{position:absolute;bottom:0;height:100%;filter:drop-shadow(0 10px 18px rgba(0,0,0,.45))}
 .title .girls .mio{left:-6%;height:94%;animation:gin .6s ease-out .1s backwards}
@@ -431,17 +435,18 @@ function toast(h){const el=document.createElement('div');el.className='toast';el
 
 /* ---------------- お守り ---------------- */
 const RELICS={
-  mawashi:{n:'まわし',ic:'🎗️',tx:'衝突ダメージ+1（最初から持っている）'},
-  chikaraishi:{n:'力石',ic:'🪨',tx:'衝突ダメージ+2'},
-  waraji:{n:'草鞋',ic:'👡',tx:'毎ターン移動力+1'},
-  hachimaki:{n:'鉢巻',ic:'🎌',tx:'戦闘の最初のターン、エネルギー+1'},
-  tate:{n:'木の盾',ic:'🪵',tx:'毎ターンのはじめにブロック3'},
-  yakusou:{n:'薬草袋',ic:'🌿',tx:'戦闘に勝つとHP+5'},
-  maneki:{n:'招き猫',ic:'🐱',tx:'もらえるゴールド+50%'},
-  jizo:{n:'お地蔵さん',ic:'🗿',tx:'敵を穴に落とすたびHP+3'},
-  ootsuchi:{n:'大槌',ic:'🔨',tx:'押すカードの押す距離+1'},
-  tenugui:{n:'手ぬぐい',ic:'🧣',tx:'手札+1枚'},
+  mawashi:{n:'生徒会の腕章',ic:'🎗️',im:'armband',tx:'衝突ダメージ+1（最初から持っている）'},
+  chikaraishi:{n:'重たい通学鞄',ic:'👜',im:'bag',tx:'衝突ダメージ+2'},
+  waraji:{n:'ヘッドホン',ic:'🎧',im:'headphones',tx:'毎ターン移動力+1'},
+  hachimaki:{n:'手作り弁当',ic:'🍱',im:'bento',tx:'戦闘の最初のターン、エネルギー+1'},
+  tate:{n:'校章の盾',ic:'🛡️',im:'shield',tx:'毎ターンのはじめにブロック3'},
+  yakusou:{n:'ほうじ茶の水筒',ic:'🧴',im:'thermos',tx:'戦闘に勝つとHP+5'},
+  maneki:{n:'皆勤メダル',ic:'🏅',im:'medal',tx:'もらえるゴールド+50%'},
+  jizo:{n:'桜のお守り',ic:'🌸',im:'sakura',tx:'敵を穴に落とすたびHP+3'},
+  ootsuchi:{n:'会長の指示書',ic:'📋',im:'clipboard',tx:'押すカードの押す距離+1'},
+  tenugui:{n:'スマホ',ic:'📱',im:'phone',tx:'手札+1枚'},
 };
+const rimg=(k,sz=22)=>`<img src="img/r_${RELICS[k].im}.webp" alt="${RELICS[k].n}" style="width:${sz}px;height:${sz}px;object-fit:contain;vertical-align:middle">`;
 const has=k=>run&&run.relics.includes(k);
 
 /* ---------------- 敵（一言で言える性格に 桜井 #204） ---------------- */
@@ -872,7 +877,7 @@ function checkWin(){
 let T=56;
 function buildBattleDom(){
   T=Math.floor(Math.min(64,(Math.min(app.clientWidth,480)-20)/N,(app.clientHeight-420)/N));T=Math.max(T,40);
-  app.innerHTML=`<div class="scr" id="bscr" style="overflow:hidden">${hudHtml(true)}
+  app.innerHTML=`<div class="scr ${B.kind==='boss'?'boss':''}" id="bscr" style="overflow:hidden">${hudHtml(true)}
     <div id="bwrap"><div id="board" style="--T:${T}px"><div id="tiles"></div><div id="units"></div><div id="fx"></div></div></div>
     <div class="talk"><img class="face" id="face" src="${FACE.akane.smile}" alt=""><div class="info"><div class="who" id="who">アカネ</div><div id="info"></div></div></div>
     <div class="ctrl"><div class="orb" id="orb"></div><div class="mv" id="mv"></div><div class="sp"></div>
@@ -1014,12 +1019,12 @@ function hudHtml(battle){
   return`<div class="hud"><span class="pill">${run.pos?run.pos.f+1:1}階</span>
     <div class="hpbar" id="hpb"><i></i><em></em><b></b></div>
     <span class="pill">💰<span id="gold">${run.gold}</span></span>
-    <div class="relics" id="rel">${run.relics.map(r=>`<span data-r="${r}">${RELICS[r].ic}</span>`).join('')}</div>
+    <div class="relics" id="rel">${run.relics.map(r=>`<span data-r="${r}">${rimg(r,24)}</span>`).join('')}</div>
     <button class="sub" id="helpb" style="padding:4px 9px;font-size:13px">？</button></div>`;
 }
 function hudBind(){
   hudUpdate();
-  $('#rel').onclick=ev=>{const s=ev.target.closest('[data-r]');if(s){const r=RELICS[s.dataset.r];modal(`<h3>${r.ic} ${r.n}</h3><p>${r.tx}</p><button onclick="closeModal()">閉じる</button>`)}};
+  $('#rel').onclick=ev=>{const s=ev.target.closest('[data-r]');if(s){const r=RELICS[s.dataset.r];modal(`<h3>${rimg(s.dataset.r,36)} ${r.n}</h3><p>${r.tx}</p><button onclick="closeModal()">閉じる</button>`)}};
   $('#helpb').onclick=()=>showHelp();
 }
 function hudUpdate(){
@@ -1075,7 +1080,7 @@ function winBattle(){
   const cards=rollCards(3,kind==='elite');
   app.innerHTML=`<div class="scr">${hudHtml()}<div class="panel"><h2>勝ち！</h2>
     <div class="rew">💰 ${g}ゴールド</div>
-    ${relic?`<div class="rew" style="background:#4a3a14">${RELICS[relic].ic} お守り「${RELICS[relic].n}」— ${RELICS[relic].tx}</div>`:''}
+    ${relic?`<div class="rew" style="background:#4a3a14">${rimg(relic,40)} <div>お守り「${RELICS[relic].n}」<br><small>${RELICS[relic].tx}</small></div></div>`:''}
     <p style="text-align:center;font-weight:800">技を1つ覚える</p>
     <div class="choices">${cards.map((c,i)=>cardHtml(c,`data-i="${i}"`)).join('')}</div>
     <button class="sub" id="skip">覚えない</button></div></div><div id="modal"></div>`;
@@ -1102,7 +1107,7 @@ function showShop(){B=null;
   const draw=()=>{
     app.innerHTML=`<div class="scr">${hudHtml()}<div class="panel"><h2>🛒 店</h2>
       <div class="choices">${cards.map((c,i)=>`<div style="display:flex;flex-direction:column;gap:4px;align-items:center;flex:0 1 110px">${c.sold?'<div class="card" style="opacity:.3">売り切れ</div>':cardHtml(c,`data-i="${i}"`)}<b style="color:${run.gold>=c.price?'var(--gold)':'#888'}">${c.sold?'':'💰'+c.price}</b></div>`).join('')}</div>
-      ${relic?`<button class="sub opt" id="br" ${run.gold<rp||run.relics.includes(relic)?'disabled':''}>${RELICS[relic].ic} ${RELICS[relic].n}（${RELICS[relic].tx}）💰${rp}</button>`:''}
+      ${relic?`<button class="sub opt" id="br" ${run.gold<rp||run.relics.includes(relic)?'disabled':''}>${rimg(relic,28)} ${RELICS[relic].n}（${RELICS[relic].tx}）💰${rp}</button>`:''}
       <button class="sub opt" id="rm" ${run.gold<P['カード削除の値段']||rmUsed?'disabled':''}>🗑 カードを1枚捨てる 💰${P['カード削除の値段']}</button>
       <button id="out">店を出る</button></div></div><div id="modal"></div>`;
     hudBind();
@@ -1119,7 +1124,7 @@ const EVENTS=[
   {t:'荒れた稽古場',d:'誰もいない稽古場。体を張れば技が磨ける。',ops:[{l:'稽古する（HP−7・ランダムに1枚強化）',ok:()=>run.hp>7,f:()=>{run.hp-=7;const c=shuffle(run.deck.filter(c=>!c.up&&CARDS[c.id].r!=='x'))[0];if(c){c.up=true;return`「${cname(c)}」になった`}}},{l:'通り過ぎる',f:()=>{}}]},
   {t:'古い道場',d:'師範が言う。「技を一つ忘れなさい。身軽になる」',ops:[{l:'忘れる（カードを1枚選んで捨てる）',pick:1},{l:'断る',f:()=>{}}]},
   {t:'落ちていた財布',d:'道に財布が落ちている。',ops:[{l:'拾う（+40ゴールド）',f:()=>{run.gold+=40}},{l:'交番に届ける（最大HP+3、HP全快）',f:()=>{run.maxHp+=3;run.hp=run.maxHp}}]},
-  {t:'力自慢の像',d:'岩を持ち上げる力士の像。台座に「押せ」と彫られている。',ops:[{l:'押してみる（HP−5・お守りをもらう）',ok:()=>run.hp>5,f:()=>{run.hp-=5;const r=rollRelic();if(r){run.relics.push(r);return`${RELICS[r].ic}「${RELICS[r].n}」を手に入れた`}}},{l:'やめておく',f:()=>{}}]},
+  {t:'力自慢の像',d:'岩を持ち上げる力士の像。台座に「押せ」と彫られている。',ops:[{l:'押してみる（HP−5・お守りをもらう）',ok:()=>run.hp>5,f:()=>{run.hp-=5;const r=rollRelic();if(r){run.relics.push(r);return`「${RELICS[r].n}」を手に入れた`}}},{l:'やめておく',f:()=>{}}]},
 ];
 function showEvent(){B=null;
   const ev=pick(EVENTS);
@@ -1152,7 +1157,7 @@ function showEnd(win,snap,spec){
   const reach=win?'大鬼を倒した！':`${run.pos?run.pos.f+1:1}階で力尽きた`;
   app.innerHTML=`<div class="scr"><div class="panel"><h2>${win?'優勝！':'負けた…'}</h2>
     <p style="text-align:center;font-weight:800">${reach}</p>
-    <img class="endgirl" src="${win?IMG.akane:IMG.mio}" alt="">
+    <img class="cg" src="img/${win?'cg_selfie':'cg_sunset'}.webp" alt="">
     <p style="text-align:center;font-weight:700;margin-top:-4px">${win?'「やったー！ 優勝だよ、会長！」':'「次は作戦を変えましょう。…まだいけるわね、アカネ？」'}</p>
     <div class="rank">${rk}</div><p style="text-align:center">スコア ${sc}${nb?' <b style="color:var(--gold)">自己ベスト！</b>':''}</p>
     ${run.ascUp?`<div class="rew" style="background:#4a1d10">🔥 本気度${run.ascUp}が解放された！（${ASC[run.ascUp]}）</div>`:''}

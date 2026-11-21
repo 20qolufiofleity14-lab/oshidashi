@@ -157,6 +157,8 @@ button:disabled{opacity:.4}
 @keyframes cut{0%{clip-path:inset(0 100% 0 0)}18%{clip-path:inset(0 0 0 0)}80%{opacity:1}100%{opacity:0;clip-path:inset(0 0 0 0)}}
 @keyframes cutf{from{translate:-60px 0}25%{translate:0 0}}
 .unit.pl .tok{overflow:hidden;padding:0}
+.unit:not(.pl) .tok{overflow:hidden;background:radial-gradient(circle at 50% 40%,#fff8ec,#f1dcc0)}
+.unit:not(.pl) .tok img{width:112%;height:112%;object-fit:contain;object-position:50% 25%;margin-top:6%}
 .unit.pl .tok img{width:130%;height:130%;object-fit:cover;object-position:50% 20%}
 .mapmemo{display:flex;gap:8px;align-items:center;padding:6px 10px;background:var(--bg2);border-top:1px solid #0004}
 .mapmemo img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #9b7bff;flex:none}
@@ -286,6 +288,7 @@ const FACE={akane:{},mio:{}};
 ['smile','closed','normal','think','soft'].forEach(m=>FACE.mio[m]=`img/f_mio_${m}.webp`);
 const DEF_MOOD={akane:'smile',mio:'normal'};
 const faceSrc=(who,mood)=>FACE[who][mood]||FACE[who][DEF_MOOD[who]];
+['goblin','archer','bomber','knight','mage','oyabun','boss'].forEach(k=>{const i=new Image();i.src=`img/e_${k}.webp`});
 Object.values(IMG).concat(Object.values(FACE.akane),Object.values(FACE.mio)).forEach(u=>{const i=new Image();i.src=u});
 const LINES={
   fall:['落ちたっ！','穴までいってらっしゃ〜い！','ナイス押し出しっ！','はい、一名様ご案内〜！'],
@@ -295,7 +298,7 @@ const LINES={
   kill:['よしっ！','一丁あがり！'],
   enemy:['相手の番よ。赤いマスを見て。','来るわ。構えて。'],
   turn:['よーし、こっちの番！','どこから押そっか？'],
-  boss:['大鬼よ。重いから穴に落としても這い上がってくるわ。'],
+  boss:['鬼校長よ。重いから穴に落としても這い上がってくるわ。'],
   win:['見事ね。次へ行きましょう。','上出来よ、アカネ。'],
 };
 const line=k=>pick(LINES[k]);
@@ -406,7 +409,7 @@ const crange=c=>cv(c).rg||CARDS[c.id].rg||4;
 let META=Object.assign({runs:0,wins:0,kills:0,falls:0,ff:0,ascOpen:0,asc:0,ach:{}},ls.get('oshidashi.meta',{}));
 const saveMeta=()=>ls.set('oshidashi.meta',META);
 const ASC=['','強敵のHP+20%','普通の敵のHP+10%','敵の攻撃+1','休憩の回復が25%に','最初のゴールド0・もらえるゴールド−20%','最大HP−6でスタート',
-  '大鬼のHP+20%・攻撃+2','敵が1体増えることがある','最初のデッキに「迷い」','敵の攻撃さらに+1'];
+  '鬼校長のHP+20%・攻撃+2','敵が1体増えることがある','最初のデッキに「迷い」','敵の攻撃さらに+1'];
 const A=n=>!!run&&(run.asc||0)>=n;
 const ACH=[
   {id:'fall1',ic:'🕳️',n:'はじめての穴',d:'敵を穴に落とす'},
@@ -416,8 +419,8 @@ const ACH=[
   {id:'elite',ic:'💀',n:'親分退治',d:'強敵に勝つ',un:'renda'},
   {id:'floor5',ic:'🏯',n:'中腹',d:'5階にたどり着く'},
   {id:'nohit',ic:'🍃',n:'無傷',d:'1度もダメージを受けずに戦闘に勝つ'},
-  {id:'boss_pit',ic:'👿',n:'鬼落とし',d:'大鬼を穴に落とす',un:'konshin'},
-  {id:'win1',ic:'🏆',n:'初優勝',d:'大鬼を倒す（本気度が解放）',un:'tsunami'},
+  {id:'boss_pit',ic:'👿',n:'鬼落とし',d:'鬼校長を穴に落とす',un:'konshin'},
+  {id:'win1',ic:'🏆',n:'初優勝',d:'鬼校長を倒す（本気度が解放）',un:'tsunami'},
   {id:'thin',ic:'🪶',n:'身軽',d:'デッキ8枚以下で優勝'},
   {id:'asc5',ic:'🔥',n:'本気の本気',d:'本気度5以上で優勝'},
   {id:'asc10',ic:'👑',n:'横綱',d:'本気度10で優勝'},
@@ -451,13 +454,13 @@ const has=k=>run&&run.relics.includes(k);
 
 /* ---------------- 敵（一言で言える性格に 桜井 #204） ---------------- */
 const EN={
-  goblin:{n:'小鬼',ic:'👹',hp:12,mv:2,ai:'melee',sh:'front',dmg:6,tr:'近づいて、目の前の1マスを殴る'},
-  archer:{n:'弓兵',ic:'🏹',hp:9,mv:2,ai:'ranged',dmg:5,tr:'まっすぐ矢を射る。最初に当たった相手に命中（仲間にも当たる）'},
+  goblin:{n:'定規の小鬼',ic:'👹',hp:12,mv:2,ai:'melee',sh:'front',dmg:6,tr:'近づいて、目の前の1マスを殴る'},
+  archer:{n:'パチンコ青鬼',ic:'🏹',hp:9,mv:2,ai:'ranged',dmg:5,tr:'まっすぐ矢を射る。最初に当たった相手に命中（仲間にも当たる）'},
   bomber:{n:'爆弾小僧',ic:'💣',hp:7,mv:2,ai:'bomb',dmg:9,tr:'近づいて次の番に自爆。周り8マスを吹き飛ばす（仲間も巻き込む）'},
-  knight:{n:'重騎士',ic:'🛡️',hp:24,mv:1,ai:'melee',sh:'sweep',dmg:8,heavy:1,tr:'重い（1マスしか押せない・投げられない）。前の3マスを薙ぎ払う'},
-  mage:{n:'呪術師',ic:'🔮',hp:11,mv:1,ai:'mage',dmg:6,tr:'あなたの今いる場所に十字の雷を予約する。予約した場所は動かない'},
+  knight:{n:'机盾の鬼',ic:'🛡️',hp:24,mv:1,ai:'melee',sh:'sweep',dmg:8,heavy:1,tr:'重い（1マスしか押せない・投げられない）。前の3マスを薙ぎ払う'},
+  mage:{n:'お札の幽霊',ic:'🔮',hp:11,mv:1,ai:'mage',dmg:6,tr:'あなたの今いる場所に十字の雷を予約する。予約した場所は動かない'},
   oyabun:{n:'鬼の親分',ic:'👺',hp:38,mv:2,ai:'melee',sh:'sweep',dmg:10,heavy:1,elite:1,tr:'重い。前の3マスを薙ぎ払う。倒せばお守り'},
-  boss:{n:'大鬼',ic:'👿',hp:80,mv:2,ai:'boss',dmg:11,heavy:1,boss:1,tr:'重い。薙ぎ払い→突進→薙ぎ払い→手下を呼ぶ、を繰り返す。穴に落ちても這い上がる'},
+  boss:{n:'鬼校長',ic:'👿',hp:80,mv:2,ai:'boss',dmg:11,heavy:1,boss:1,tr:'重い。薙ぎ払い→突進→薙ぎ払い→手下を呼ぶ、を繰り返す。穴に落ちても這い上がる'},
 };
 
 /* =====================================================================
@@ -476,7 +479,7 @@ function saveRun(){if(run)ls.set('oshidashi.run',run)}
 function clearRun(){ls.del('oshidashi.run')}
 
 /* ---------------- マップ ---------------- */
-const NODE={battle:{ic:'⚔️',n:'戦闘'},elite:{ic:'💀',n:'強敵（お守り）'},rest:{ic:'🔥',n:'休憩'},shop:{ic:'🛒',n:'店'},event:{ic:'❓',n:'出来事'},boss:{ic:'👿',n:'大鬼'}};
+const NODE={battle:{ic:'⚔️',n:'戦闘'},elite:{ic:'💀',n:'強敵（お守り）'},rest:{ic:'🔥',n:'休憩'},shop:{ic:'🛒',n:'店'},event:{ic:'❓',n:'出来事'},boss:{ic:'👿',n:'鬼校長'}};
 function genMap(){
   const F=P['階の数'];const fl=[];
   for(let f=0;f<F;f++){
@@ -519,7 +522,7 @@ function showMap(){
   mw.querySelectorAll('.node.av').forEach(g=>g.onclick=()=>{ac();const f=+g.dataset.f,i=+g.dataset.i;run.pos={f,i};enterNode(fl[f][i])});
 }
 const MEMO=['💀の強敵は手強いけど、倒せばお守りが手に入るわ。','🔥休憩では、休むか技を鍛えるか。鍛えた技は長く効くわよ。','🛒お店では技を捨てることもできるの。山札は軽い方が強いわ。',
-  '押す技が多いほど、穴と岩が武器になる。地形をよく見て。','一番上の👿が大鬼。そこまでにHPを残しておきなさい。','❓の出来事は運試し。HPに余裕がある時に寄るといいわ。'];
+  '押す技が多いほど、穴と岩が武器になる。地形をよく見て。','一番上の👿が鬼校長。そこまでにHPを残しておきなさい。','❓の出来事は運試し。HPに余裕がある時に寄るといいわ。'];
 function enterNode(n){
   sfx('card');
   if(n.t==='battle'||n.t==='elite'||n.t==='boss')startBattle(n.t);
@@ -902,7 +905,7 @@ function buildTiles(){
 function mkUnitEl(u){
   const el=document.createElement('div');
   el.className='unit'+(u.pl?' pl':'')+(u.def&&u.def.boss?' boss':'')+(u.def&&u.def.elite?' elite':'');
-  el.innerHTML=`${u.pl?'':'<div class="arw"></div>'}<div class="tok">${u.pl?`<img src="${FACE.akane.smile}" alt="">`:u.def.ic}</div><div class="hp"><i></i></div>${u.pl?'<div class="shd" style="display:none"></div>':'<div class="ord"></div><div class="it"></div>'}`;
+  el.innerHTML=`${u.pl?'':'<div class="arw"></div>'}<div class="tok">${u.pl?`<img src="${FACE.akane.smile}" alt="">`:`<img src="img/e_${u.k}.webp" alt="${u.def.n}">`}</div><div class="hp"><i></i></div>${u.pl?'<div class="shd" style="display:none"></div>':'<div class="ord"></div><div class="it"></div>'}`;
   $('#units').appendChild(el);u.el=el;place(u);
 }
 function place(u){if(u.el)u.el.style.transform=`translate(${u.x*T}px,${u.y*T}px)`}
@@ -992,7 +995,7 @@ function render(){
   let who='akane',mood=B.sel>=0?'shout':(B.tut&&B.tutStep===2?'laugh':'smile');
   if(B.msg)h=`<b>${esc(B.msg)}</b>`;
   else if(B.sel>=0){const c=B.hand[B.sel];h=`<b>${cname(c)}</b>（${ccost(c)}）${ctext(c)}<br><span class="hint">${CARDS[c.id].t==='self'?'もう一度タップで使う':'黄色く光る所をタップ'}</span>`}
-  else if(B.focus&&B.focus.alive){const e=B.focus;h=`<b>${e.def.n}</b> HP ${e.hp}/${e.maxHp}　次：${intentText(e)}<br><small>${e.def.tr}</small>`}
+  else if(B.focus&&B.focus.alive){const e=B.focus;h=`<img src="img/e_${e.k}.webp" alt="" style="float:right;height:46px;margin:-4px -4px 0 6px"><b>${e.def.n}</b> HP ${e.hp}/${e.maxHp}　次：${intentText(e)}<br><small>${e.def.tr}</small>`}
   else if(B.say){h=esc(B.say.t);who=B.say.who;mood=B.say.mood}
   else if(B.tut&&B.tutStep!=null&&B.tutStep<5)h=TUT[B.tutStep];
   else{const pr=predicted();h=pr?`このままだと <b>${Math.max(0,pr-B.block)}ダメージ</b>${B.block?`（ブロック${B.block}で軽減）`:''}もらっちゃう！ 赤いマスから出るか、守ろっ`:'敵をタップすると何してくるか分かるよ。光るマスで移動、カードで攻撃！'}
@@ -1154,7 +1157,7 @@ function showEnd(win,snap,spec){
   const na=(run.newAch||[]).map(id=>ACH.find(a=>a.id===id));
   const sc=scoreOf(win),rk=rankOf(sc),s=run.stats;
   const best=ls.get('oshidashi.best',{score:0});const nb=sc>best.score;if(nb)ls.set('oshidashi.best',{score:sc,floor:run.floorsDone,win,rank:rk});
-  const reach=win?'大鬼を倒した！':`${run.pos?run.pos.f+1:1}階で力尽きた`;
+  const reach=win?'鬼校長を倒した！':`${run.pos?run.pos.f+1:1}階で力尽きた`;
   app.innerHTML=`<div class="scr"><div class="panel"><h2>${win?'優勝！':'負けた…'}</h2>
     <p style="text-align:center;font-weight:800">${reach}</p>
     <img class="cg" src="img/${win?'cg_selfie':'cg_sunset'}.webp" alt="">

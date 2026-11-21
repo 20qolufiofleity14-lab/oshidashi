@@ -188,25 +188,29 @@ html.embed .title .logo{top:16px}
 .ctrl .sp{flex:1}
 .ctrl button{padding:10px 12px;font-size:14px}
 #endt.hl{animation:pulse .7s infinite;background:#ffe14a}
-.hand{display:flex;justify-content:center;gap:5px;padding:16px 6px 10px;min-height:166px;align-items:flex-start}
-.card{flex:0 1 84px;min-width:0;height:146px;border-radius:9px;position:relative;cursor:pointer;transition:transform .1s;overflow:hidden;color:#3a2418;
-  background:#fbf4e4;border:2px solid #3a2418;box-shadow:0 3px 0 #000,inset 0 0 0 3px #fbf4e4,inset 0 0 0 4px var(--ck);padding:0;--ck:#8a5a2e;--cw:rgba(138,90,46,.16)}
-.card.atk{--ck:#8a1f2e;--cw:rgba(196,52,70,.18)}.card.def{--ck:#1f5a48;--cw:rgba(47,138,108,.18)}.card.skl{--ck:#9a6a10;--cw:rgba(230,170,40,.2)}
-.card::before,.card::after{content:"";position:absolute;width:7px;height:7px;background:var(--ck);transform:rotate(45deg);z-index:1}
-.card::before{left:50%;margin-left:-3.5px;top:2px}.card::after{left:50%;margin-left:-3.5px;bottom:2px}
-.card .art{position:absolute;left:6px;right:6px;top:7px;height:58px;border-radius:40px 40px 6px 6px;background:radial-gradient(circle at 50% 60%,#fff 0,var(--cw) 70%),var(--cw);
-  display:flex;align-items:center;justify-content:center;border:1px solid var(--ck)}
-.card .art::before{content:"";position:absolute;inset:3px;border-radius:36px 36px 4px 4px;border:1px dashed var(--ck);opacity:.35}
-.card .em{font-family:var(--mincho);font-weight:800;font-size:32px;line-height:1;color:var(--ck);text-shadow:0 2px 0 #fff,0 0 12px #fff}
-.card .cc{position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3c4,#f2b33a 60%,#a86a10);border:2px solid #3a2418;
-  font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;z-index:2;color:#3a2418}
-.card .ct{position:absolute;right:5px;top:5px;font-size:9px;font-weight:900;color:#fff;background:var(--ck);border-radius:4px;padding:0 3px;z-index:2}
-.card .cn{position:absolute;left:-2px;right:-2px;top:62px;height:19px;background:var(--ck);color:#fbf4e4;font-family:var(--mincho);font-weight:800;font-size:12px;
-  text-align:center;line-height:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px;box-shadow:0 2px 0 rgba(0,0,0,.25)}
-.card .tx{position:absolute;left:6px;right:6px;top:84px;bottom:11px;font-size:9.8px;line-height:1.3;font-weight:600;overflow:hidden;text-align:center}
-.card.up{box-shadow:0 3px 0 #000,inset 0 0 0 3px #fbf4e4,inset 0 0 0 4px #e0a020,0 0 10px rgba(255,200,60,.6)}
+.hand{display:flex;justify-content:center;gap:5px;padding:16px 6px 10px;min-height:178px;align-items:flex-start}
+.card{flex:0 1 84px;min-width:0;height:158px;border-radius:10px;position:relative;cursor:pointer;transition:transform .1s;overflow:hidden;color:#3a2418;
+  --ck:#8a5a2e;--cw:rgba(138,90,46,.16);--rf:#b9804a;
+  border:3px solid transparent;background:linear-gradient(#fbf4e4,#fbf4e4) padding-box,linear-gradient(135deg,var(--rf),#fff6d8 45%,var(--rf)) border-box;box-shadow:0 3px 0 #000}
+.card.atk{--ck:#8a1f2e;--cw:rgba(196,52,70,.22)}.card.def{--ck:#1f5a48;--cw:rgba(47,138,108,.22)}.card.skl{--ck:#9a6a10;--cw:rgba(230,170,40,.24)}
+.card.rN{--rf:#b47a45}.card.rR{--rf:#9aa7b4}.card.rSR{--rf:#e0a91c}
+.card.rSSR{background:linear-gradient(#fbf4e4,#fbf4e4) padding-box,conic-gradient(from var(--ang,0deg),#ff6f9c,#ffd23f,#6fe3a6,#5fb6ff,#b07bff,#ff6f9c) border-box;animation:ssr 3s linear infinite}
+@property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes ssr{to{--ang:360deg}}
+.card .art{position:absolute;left:0;right:0;top:0;height:92px;background:radial-gradient(circle at 50% 55%,#fff 0,var(--cw) 75%),var(--cw);overflow:hidden}
+.card.rSSR .art{background:radial-gradient(circle at 50% 55%,#fff 0,rgba(255,214,120,.45) 60%,rgba(255,140,190,.4) 100%)}
+.card .art img{position:absolute;left:50%;top:50%;width:118%;height:118%;object-fit:contain;transform:translate(-50%,-46%);filter:drop-shadow(0 2px 0 rgba(0,0,0,.18))}
+.card .em{position:absolute;right:3px;bottom:2px;font-family:var(--mincho);font-weight:800;font-size:15px;line-height:1;color:#fff;background:var(--ck);border-radius:5px;padding:2px 3px;box-shadow:0 1px 0 #0006}
+.card .rar{position:absolute;left:3px;bottom:2px;font-size:9px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--rf),#3a2418);padding:1px 5px;border-radius:4px;letter-spacing:.05em}
+.card.rSSR .rar{background:linear-gradient(90deg,#ff6f9c,#ffb347,#5fb6ff)}
+.card .cc{position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3c4,#f2b33a 60%,#a86a10);border:2px solid #3a2418;
+  font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;z-index:2;color:#3a2418}
+.card .ct{position:absolute;right:4px;top:4px;font-size:9px;font-weight:900;color:#fff;background:var(--ck);border-radius:4px;padding:0 3px;z-index:2}
+.card .cn{position:absolute;left:0;right:0;top:92px;height:19px;background:var(--ck);color:#fbf4e4;font-family:var(--mincho);font-weight:800;font-size:12px;
+  text-align:center;line-height:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
+.card .tx{position:absolute;left:5px;right:5px;top:114px;bottom:4px;font-size:9.5px;line-height:1.28;font-weight:600;overflow:hidden;text-align:center}
 .card.up .cn{background:linear-gradient(90deg,#b07a10,#f2c14e,#b07a10);color:#3a2418}
-.card.sel{transform:translateY(-14px);box-shadow:0 0 0 3px #ffe14a,0 8px 0 #000,inset 0 0 0 3px #fbf4e4,inset 0 0 0 4px var(--ck)}
+.card.sel{transform:translateY(-14px);box-shadow:0 0 0 3px #ffe14a,0 8px 0 #000}
 .card.no{filter:grayscale(.75) brightness(.72)}
 .card.enter{animation:cin .18s ease-out backwards}
 @keyframes cin{from{translate:0 40px;opacity:0}}
@@ -232,16 +236,16 @@ html.embed .title .logo{top:16px}
 .panel h2{margin:0;font-family:var(--title);font-weight:400;font-size:28px;text-align:center;color:var(--gold)}
 .panel p{margin:0;line-height:1.6}
 .choices{display:flex;gap:8px;justify-content:center}
-.choices .card{flex:0 1 104px;height:162px}
-.choices .card .tx{font-size:10.5px}
-.choices .card .art{height:62px}.choices .card .cn{top:66px}.choices .card .tx{top:88px}
+.choices .card{flex:0 1 108px;height:186px}
+.choices .card .tx{font-size:10.5px;top:132px}
+.choices .card .art{height:110px}.choices .card .cn{top:110px;font-size:13px}
 .rew{display:flex;align-items:center;gap:10px;background:var(--panel);border-radius:12px;padding:10px 12px;font-weight:700}
 #modal{position:absolute;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
 #modal.on{display:flex}
 #modal .box{background:var(--panel);border:2px solid #000;border-radius:16px;max-height:85dvh;overflow:auto;width:100%;max-width:440px;padding:16px;display:flex;flex-direction:column;gap:10px}
 #modal h3{margin:0;font-size:18px;color:var(--gold)}
 .list{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.list .card{flex:0 0 92px;height:146px}
+.list .card{flex:0 0 92px;height:158px}
 .opt{text-align:left;font-size:15px}
 .stats{background:#000a;border-radius:12px;padding:10px 14px;line-height:1.9;font-size:14px}
 .rank{font-family:var(--title);font-size:72px;text-align:center;color:var(--gold);text-shadow:0 4px 0 #6b3b12;line-height:1}
@@ -413,8 +417,10 @@ const STARTER=['tsuki','tsuki','tsuki','tsuki','kamae','kamae','kamae','kamae','
 const GLYPH={tsuki:'突',kamae:'構',fumikomi:'歩',taiatari:'体',harite:'張',shihou:'払',seoi:'投',kusari:'鎖',ishi:'石',shouha:'波',irekae:'替',teppeki:'壁',
   ukenagashi:'流',yochi:'読',kairiki:'力',iwaotoshi:'机',renda:'連',konshin:'魂',acchi:'向',shippu:'風',fukitobashi:'飛',tsunami:'潮',kyuusho:'急',otoshiana:'穴',mayoi:'迷'};
 const KIND={atk:'攻',def:'守',skl:'技'};
-function cardInner(c){const d=CARDS[c.id];const k=ccost(c);
-  return `<div class="cc">${k>=99?'×':k}</div><div class="ct">${KIND[d.k]}</div><div class="art"><span class="em">${GLYPH[c.id]||'？'}</span></div><div class="cn">${cname(c)}</div><div class="tx">${ctext(c)}</div>`}
+const RAR={s:'N',c:'R',u:'SR',r:'SSR',x:'N'};
+const rarOf=c=>RAR[CARDS[c.id].r]||'N';
+function cardInner(c){const d=CARDS[c.id];const k=ccost(c);const art=c.id==='mayoi'?'':`<img src="img/c_${c.id}.webp" alt="" loading="lazy">`;
+  return `<div class="cc">${k>=99?'×':k}</div><div class="ct">${KIND[d.k]}</div><div class="art">${art}<span class="rar">${rarOf(c)}</span><span class="em">${GLYPH[c.id]||'？'}</span></div><div class="cn">${cname(c)}</div><div class="tx">${ctext(c)}</div>`}
 const cv=c=>{const d=CARDS[c.id];return c.up?Object.assign({},d.v,d.u):d.v};
 const ccost=c=>{const v=cv(c);return v.c!=null?v.c:CARDS[c.id].c};
 const cname=c=>CARDS[c.id].n+(c.up?'+':'');
@@ -895,7 +901,7 @@ function checkWin(){
 /* ---------- 戦闘画面 ---------- */
 let T=56;
 function buildBattleDom(){
-  T=Math.floor(Math.min(64,(Math.min(app.clientWidth,480)-20)/N,(app.clientHeight-420)/N));T=Math.max(T,40);
+  T=Math.floor(Math.min(64,(Math.min(app.clientWidth,480)-20)/N,(app.clientHeight-432)/N));T=Math.max(T,40);
   app.innerHTML=`<div class="scr ${B.kind==='boss'?'boss':''}" id="bscr" style="overflow:hidden">${hudHtml(true)}
     <div id="bwrap"><div id="board" style="--T:${T}px"><div id="tiles"></div><div id="units"></div><div id="fx"></div></div></div>
     <div class="talk"><img class="face" id="face" src="${FACE.akane.smile}" alt=""><div class="info"><div class="who" id="who">アカネ</div><div id="info"></div></div></div>
@@ -1028,7 +1034,7 @@ function render(){
   // 手札
   const hd=$('#hand');
   hd.innerHTML=B.hand.map((c,i)=>{const no=!!playable(c);const d=CARDS[c.id];
-    return`<div class="card ${d.k} ${c.up?'up':''} ${i===B.sel?'sel':''} ${no?'no':''} ${c.fresh?'enter':''}" data-i="${i}" style="${c.fresh?`animation-delay:${i*40}ms`:''}">
+    return`<div class="card ${d.k} r${rarOf(c)} ${c.up?'up':''} ${i===B.sel?'sel':''} ${no?'no':''} ${c.fresh?'enter':''}" data-i="${i}" style="${c.fresh?`animation-delay:${i*40}ms`:''}">
 ${cardInner(c)}</div>`}).join('');
   B.hand.forEach(c=>delete c.fresh);
 }
@@ -1061,7 +1067,7 @@ function hudUpdate(){
 function modal(html){const m=$('#modal');m.innerHTML=`<div class="box">${html}</div>`;m.classList.add('on');m.onclick=e=>{if(e.target===m)closeModal()}}
 function closeModal(){const m=$('#modal');if(m){m.classList.remove('on');m.innerHTML=''}}
 window.closeModal=closeModal;
-function cardHtml(c,extra=''){const d=CARDS[c.id];return`<div class="card ${d.k} ${c.up?'up':''}" ${extra}>${cardInner(c)}</div>`}
+function cardHtml(c,extra=''){const d=CARDS[c.id];return`<div class="card ${d.k} r${rarOf(c)} ${c.up?'up':''}" ${extra}>${cardInner(c)}</div>`}
 function showDeck(){modal(`<h3>デッキ（${run.deck.length}枚）</h3><div class="list">${run.deck.map(c=>cardHtml(c)).join('')}</div><button onclick="closeModal()">閉じる</button>`)}
 function showPiles(){modal(`<h3>山札 ${B.drawP.length}枚（順番は秘密）</h3><div class="list">${B.drawP.slice().sort((a,b)=>a.id<b.id?-1:1).map(c=>cardHtml(c)).join('')||'<p>なし</p>'}</div>
   <h3>捨て札 ${B.disc.length}枚</h3><div class="list">${B.disc.map(c=>cardHtml(c)).join('')||'<p>なし</p>'}</div><button onclick="closeModal()">閉じる</button>`)}

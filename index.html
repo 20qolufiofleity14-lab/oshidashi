@@ -2,7 +2,7 @@
 <html lang="ja"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#1b1712">
+<meta name="theme-color" content="#13201b">
 <title>オシダシ</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -10,16 +10,16 @@
 <meta name="apple-mobile-web-app-title" content="オシダシ">
 <meta name="mini-category" content="other">
 <meta name="mini-desc" content="押して、ぶつけて、落とす。デッキ構築×マス目タクティクスのローグライト">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Shippori+Mincho+B1:wght@800&display=swap">
 <style>
 /* 【見た目】判定のあるもの（床・岩・穴・敵の攻撃マス）を明るく強く、背景は暗く控えめに（桜井 #030） */
 :root{
-  --bg:#1b1712;--bg2:#26201a;--panel:#2f2720;--fg:#f4ead8;--muted:#b5a68c;
+  --bg:#13201b;--bg2:#1b2d26;--panel:#233a31;--fg:#f6efe2;--muted:#b8c4b6;--mar:#7a2533;
   --floor:#e2cfa4;--floor2:#d6c08f;--rock:#5d5a55;--pit:#0b0907;
-  --pl:#2a6fd6;--en:#c9312f;--gold:#f2c14e;--blk:#5fa8ff;--ok:#5fcf8f;
+  --pl:#ff7a3d;--en:#c9312f;--gold:#ffb347;--blk:#5fa8ff;--ok:#5fcf8f;
   --T:56px;
   --f:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif;
-  --title:"Dela Gothic One","Hiragino Sans",sans-serif;
+  --title:"Dela Gothic One","Hiragino Sans",sans-serif;--mincho:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:var(--f);overscroll-behavior:none}
@@ -34,10 +34,19 @@ button:disabled{opacity:.4}
 .scr{flex:1;display:flex;flex-direction:column;overflow:auto}
 
 /* タイトル */
-.title{align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px;
-  background:radial-gradient(circle at 50% 35%,#4a2d1a 0,#1b1712 70%)}
-.title h1{font-family:var(--title);font-size:64px;margin:0;letter-spacing:.04em;color:var(--gold);
-  text-shadow:0 4px 0 #6b3b12,0 0 30px rgba(242,193,78,.35);transform:rotate(-3deg)}
+.title{position:relative;align-items:center;justify-content:flex-end;gap:12px;text-align:center;padding:20px 20px 28px;overflow:hidden;
+  background:radial-gradient(120% 70% at 50% 30%,#7a2533 0,#3a1a24 45%,#13201b 85%)}
+.title .girls{position:absolute;left:0;right:0;top:70px;bottom:210px;pointer-events:none}
+.title .girls img{position:absolute;bottom:0;height:100%;filter:drop-shadow(0 10px 18px rgba(0,0,0,.45))}
+.title .girls .mio{left:-6%;height:94%;animation:gin .6s ease-out .1s backwards}
+.title .girls .akane{right:-8%;animation:gin .6s ease-out backwards}
+@keyframes gin{from{opacity:0;translate:0 30px}}
+.title .shade{position:absolute;left:0;right:0;bottom:0;height:55%;background:linear-gradient(transparent,rgba(19,32,27,.92) 45%,#13201b);pointer-events:none}
+.title h1,.title .tag,.title .asc,.title .btns,.title .best{position:relative;z-index:2}
+.title .logo{position:absolute;top:calc(env(safe-area-inset-top) + 18px);left:0;right:0;z-index:2}
+.title h1{font-family:var(--title);font-size:60px;margin:0;letter-spacing:.04em;color:#fff;
+  -webkit-text-stroke:3px #7a2533;paint-order:stroke;text-shadow:0 5px 0 #3a1a24,0 0 30px rgba(255,122,61,.45);transform:rotate(-3deg)}
+.title .club{display:inline-block;margin-top:6px;background:#f6efe2;color:#7a2533;font-weight:900;font-size:13px;padding:4px 14px;border-radius:999px;letter-spacing:.08em}
 .title .tag{font-size:18px;font-weight:800}
 .title .demo{font-size:44px;letter-spacing:2px;margin:6px 0 4px}
 .title .demo span{display:inline-block}
@@ -61,15 +70,14 @@ button:disabled{opacity:.4}
 .pill{background:#000a;border-radius:10px;padding:2px 7px;white-space:nowrap}
 
 /* 盤 */
-#bwrap{display:flex;justify-content:center;padding:8px 0 4px;position:relative}
+#bwrap{display:flex;justify-content:center;padding:14px 0 10px;position:relative}
 #board{position:relative;width:calc(var(--T)*6);height:calc(var(--T)*6);border-radius:8px;
-  box-shadow:0 0 0 3px #000,0 0 0 6px #4a3a2a,0 10px 30px #000}
+  box-shadow:0 0 0 3px #1d2e26,0 0 0 9px #2f4a3a,0 0 0 11px #7a5230,0 12px 30px #000}
 .tile{position:absolute;width:var(--T);height:var(--T);border:1px solid rgba(0,0,0,.18)}
-.tile.f{background:var(--floor)}
-.tile.f.alt{background:var(--floor2)}
-.tile.r{background:radial-gradient(circle at 35% 30%,#9a958c 0,#5d5a55 45%,#3a3733 100%);border-color:#000;box-shadow:inset 0 -6px 0 rgba(0,0,0,.35)}
-.tile.p{background:radial-gradient(circle,#000 0,#000 45%,#1d140c 100%);box-shadow:inset 0 6px 10px #000}
-.tile.p::after{content:"";position:absolute;inset:3px;border:2px dashed rgba(255,190,90,.25);border-radius:4px}
+.tile.f{background:linear-gradient(90deg,rgba(90,50,20,.14) 1px,transparent 1px) 0 0/50% 100%,repeating-linear-gradient(180deg,#ebcb98 0 12px,#e0bb82 12px 13px)}
+.tile.f.alt{background:linear-gradient(90deg,rgba(90,50,20,.14) 1px,transparent 1px) 25% 0/50% 100%,repeating-linear-gradient(180deg,#e6c48e 0 12px,#d9b278 12px 13px)}
+.tile.r{background:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 52 52%22%3E%3Cellipse cx=%2226%22 cy=%2246%22 rx=%2220%22 ry=%224%22 fill=%22rgba(0,0,0,.25)%22/%3E%3Crect x=%229%22 y=%2230%22 width=%224%22 height=%2215%22 fill=%22%235b5f66%22/%3E%3Crect x=%2239%22 y=%2230%22 width=%224%22 height=%2215%22 fill=%22%235b5f66%22/%3E%3Cpath d=%22M5 14 L47 14 L47 30 L5 30Z%22 fill=%22%23c98b4e%22/%3E%3Cpath d=%22M5 14 L47 14 L44 9 L8 9Z%22 fill=%22%23e8b277%22/%3E%3Cpath d=%22M5 26 h42 v4 h-42z%22 fill=%22%239a6331%22/%3E%3Crect x=%2212%22 y=%2211%22 width=%2210%22 height=%222.5%22 rx=%221%22 fill=%22%23ffffff%22 opacity=%22.85%22/%3E%3Cpath d=%22M31 10.5 l9 2%22 stroke=%22%23ffcf4a%22 stroke-width=%221.8%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M40 12.5 l1.5 .3%22 stroke=%22%23ff7a8a%22 stroke-width=%221.8%22 stroke-linecap=%22round%22/%3E%3C/svg%3E") center/92% no-repeat,repeating-linear-gradient(180deg,#ebcb98 0 12px,#e0bb82 12px 13px)}
+.tile.p{background:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 52 52%22%3E%3Cpath d=%22M6 12 L14 6 L22 10 L30 4 L40 9 L47 16 L44 26 L48 36 L40 45 L28 47 L18 44 L8 46 L5 34 L9 24Z%22 fill=%22%238a5a2e%22/%3E%3Cpath d=%22M9 14 L16 9 L23 13 L30 8 L39 12 L44 18 L41 27 L44 35 L38 42 L28 43 L19 41 L11 42 L9 33 L12 24Z%22 fill=%22%23120a06%22/%3E%3Cellipse cx=%2226%22 cy=%2222%22 rx=%2214%22 ry=%226%22 fill=%22%232a1a10%22 opacity=%22.7%22/%3E%3Cpath d=%22M30 4 L28 10 M14 6 L16 10 M47 16 L42 18%22 stroke=%22%235a3818%22 stroke-width=%221.5%22/%3E%3C/svg%3E") center/100% no-repeat,repeating-linear-gradient(180deg,#ebcb98 0 12px,#e0bb82 12px 13px)}
 .tile .dz{position:absolute;inset:0;pointer-events:none}
 .tile.dg .dz{background:repeating-linear-gradient(135deg,rgba(220,30,30,.55) 0 6px,rgba(220,30,30,.32) 6px 12px);box-shadow:inset 0 0 0 2px #b00}
 .tile.dz-abs .dz{background:repeating-linear-gradient(135deg,rgba(150,60,230,.55) 0 6px,rgba(150,60,230,.3) 6px 12px);box-shadow:inset 0 0 0 2px #6a1fbf}
@@ -130,6 +138,26 @@ button:disabled{opacity:.4}
 @keyframes shl{0%,100%{translate:0}12%{translate:-8px 2px}25%{translate:8px -2px}37%{translate:-6px 1px}50%{translate:6px -1px}62%{translate:-3px 0}75%{translate:3px 0}87%{translate:-1px 0}}
 
 /* 情報行・操作 */
+.talk{display:flex;align-items:flex-end;gap:6px;margin:4px 8px 0}
+.talk .face{width:68px;height:68px;border-radius:50%;flex:none;object-fit:cover;background:#f6efe2;border:3px solid var(--pl);box-shadow:0 3px 0 #000}
+.talk .face.mio{border-color:#9b7bff}
+.talk .info{flex:1;margin:0;position:relative;background:#f6efe2;color:#2a1d18;border:none;border-radius:14px;min-height:56px}
+.talk .info::before{content:"";position:absolute;left:-7px;bottom:14px;border:7px solid transparent;border-right-color:#f6efe2;border-left:0}
+.talk .info b{color:#7a2533}.talk .info .hint{color:#0b6b52}
+.talk .who{font-size:10px;font-weight:900;color:#ff7a3d;letter-spacing:.05em}
+.talk .who.mio{color:#6a4fd8}
+.cutin{position:absolute;left:-10%;right:-10%;height:86px;z-index:25;pointer-events:none;transform:rotate(-7deg);
+  background:linear-gradient(90deg,#7a2533,#ff7a3d);box-shadow:0 0 0 4px #f6efe2,0 0 0 7px #000;display:flex;align-items:center;overflow:hidden;animation:cut .7s ease-out forwards}
+.cutin img{height:150%;margin-left:14%;align-self:flex-start;animation:cutf .7s ease-out forwards}
+.cutin span{font-family:var(--title);font-size:30px;color:#fff;-webkit-text-stroke:2px #000;paint-order:stroke;margin-left:10px;white-space:nowrap}
+@keyframes cut{0%{clip-path:inset(0 100% 0 0)}18%{clip-path:inset(0 0 0 0)}80%{opacity:1}100%{opacity:0;clip-path:inset(0 0 0 0)}}
+@keyframes cutf{from{translate:-60px 0}25%{translate:0 0}}
+.unit.pl .tok{overflow:hidden;padding:0}
+.unit.pl .tok img{width:130%;height:130%;object-fit:cover;object-position:50% 20%}
+.mapmemo{display:flex;gap:8px;align-items:center;padding:6px 10px;background:var(--bg2);border-top:1px solid #0004}
+.mapmemo img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #9b7bff;flex:none}
+.mapmemo div{background:#f6efe2;color:#2a1d18;border-radius:12px;padding:6px 10px;font-size:12.5px;line-height:1.45;font-weight:600}
+.endgirl{display:block;margin:0 auto;height:200px;filter:drop-shadow(0 6px 10px #0008)}
 .info{margin:4px 8px 0;min-height:52px;background:#000a;border-radius:10px;padding:6px 10px;font-size:13px;line-height:1.45;border:1px solid #3a3027}
 .info b{color:var(--gold)}.info .hint{color:#9fe3ff;font-weight:800}
 .ctrl{display:flex;align-items:center;gap:6px;padding:6px 8px}
@@ -140,16 +168,26 @@ button:disabled{opacity:.4}
 .ctrl .sp{flex:1}
 .ctrl button{padding:10px 12px;font-size:14px}
 #endt.hl{animation:pulse .7s infinite;background:#ffe14a}
-.hand{display:flex;justify-content:center;gap:4px;padding:16px 6px 10px;min-height:150px;align-items:flex-start}
-.card{flex:0 1 84px;min-width:0;height:132px;border-radius:10px;background:linear-gradient(#fff6e2,#ead6aa);color:#2a1d0c;position:relative;
-  border:2px solid #000;box-shadow:0 3px 0 #000;padding:24px 5px 4px;font-size:11px;line-height:1.3;transition:transform .1s;overflow:hidden;cursor:pointer}
-.card.atk{background:linear-gradient(#ffe8df,#f0b9a2)}.card.def{background:linear-gradient(#e6f0ff,#a9c6ef)}.card.skl{background:linear-gradient(#e8fbe6,#aedca6)}
-.card .cn{font-weight:900;font-size:12.5px;text-align:center;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card.up .cn{color:#0b7a2e}
-.card .cc{position:absolute;left:3px;top:2px;width:20px;height:20px;border-radius:50%;background:#f2a81e;border:2px solid #000;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center}
-.card .ct{position:absolute;right:4px;top:3px;font-size:10px;opacity:.7}
-.card.sel{transform:translateY(-14px);box-shadow:0 0 0 3px #ffe14a,0 8px 0 #000}
-.card.no{filter:grayscale(.7) brightness(.7)}
+.hand{display:flex;justify-content:center;gap:5px;padding:16px 6px 10px;min-height:166px;align-items:flex-start}
+.card{flex:0 1 84px;min-width:0;height:146px;border-radius:9px;position:relative;cursor:pointer;transition:transform .1s;overflow:hidden;color:#3a2418;
+  background:#fbf4e4;border:2px solid #3a2418;box-shadow:0 3px 0 #000,inset 0 0 0 3px #fbf4e4,inset 0 0 0 4px var(--ck);padding:0;--ck:#8a5a2e;--cw:rgba(138,90,46,.16)}
+.card.atk{--ck:#8a1f2e;--cw:rgba(196,52,70,.18)}.card.def{--ck:#1f5a48;--cw:rgba(47,138,108,.18)}.card.skl{--ck:#9a6a10;--cw:rgba(230,170,40,.2)}
+.card::before,.card::after{content:"";position:absolute;width:7px;height:7px;background:var(--ck);transform:rotate(45deg);z-index:1}
+.card::before{left:50%;margin-left:-3.5px;top:2px}.card::after{left:50%;margin-left:-3.5px;bottom:2px}
+.card .art{position:absolute;left:6px;right:6px;top:7px;height:58px;border-radius:40px 40px 6px 6px;background:radial-gradient(circle at 50% 60%,#fff 0,var(--cw) 70%),var(--cw);
+  display:flex;align-items:center;justify-content:center;border:1px solid var(--ck)}
+.card .art::before{content:"";position:absolute;inset:3px;border-radius:36px 36px 4px 4px;border:1px dashed var(--ck);opacity:.35}
+.card .em{font-family:var(--mincho);font-weight:800;font-size:32px;line-height:1;color:var(--ck);text-shadow:0 2px 0 #fff,0 0 12px #fff}
+.card .cc{position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3c4,#f2b33a 60%,#a86a10);border:2px solid #3a2418;
+  font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;z-index:2;color:#3a2418}
+.card .ct{position:absolute;right:5px;top:5px;font-size:9px;font-weight:900;color:#fff;background:var(--ck);border-radius:4px;padding:0 3px;z-index:2}
+.card .cn{position:absolute;left:-2px;right:-2px;top:62px;height:19px;background:var(--ck);color:#fbf4e4;font-family:var(--mincho);font-weight:800;font-size:12px;
+  text-align:center;line-height:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.card .tx{position:absolute;left:6px;right:6px;top:84px;bottom:11px;font-size:9.8px;line-height:1.3;font-weight:600;overflow:hidden;text-align:center}
+.card.up{box-shadow:0 3px 0 #000,inset 0 0 0 3px #fbf4e4,inset 0 0 0 4px #e0a020,0 0 10px rgba(255,200,60,.6)}
+.card.up .cn{background:linear-gradient(90deg,#b07a10,#f2c14e,#b07a10);color:#3a2418}
+.card.sel{transform:translateY(-14px);box-shadow:0 0 0 3px #ffe14a,0 8px 0 #000,inset 0 0 0 3px #fbf4e4,inset 0 0 0 4px var(--ck)}
+.card.no{filter:grayscale(.75) brightness(.72)}
 .card.enter{animation:cin .18s ease-out backwards}
 @keyframes cin{from{translate:0 40px;opacity:0}}
 .banner{position:absolute;left:0;right:0;top:38%;text-align:center;font-family:var(--title);font-size:30px;color:#fff;
@@ -174,15 +212,16 @@ button:disabled{opacity:.4}
 .panel h2{margin:0;font-family:var(--title);font-weight:400;font-size:28px;text-align:center;color:var(--gold)}
 .panel p{margin:0;line-height:1.6}
 .choices{display:flex;gap:8px;justify-content:center}
-.choices .card{flex:0 1 110px;height:150px;font-size:12px}
-.choices .card .cn{font-size:14px}
+.choices .card{flex:0 1 104px;height:162px}
+.choices .card .tx{font-size:10.5px}
+.choices .card .art{height:62px}.choices .card .cn{top:66px}.choices .card .tx{top:88px}
 .rew{display:flex;align-items:center;gap:10px;background:var(--panel);border-radius:12px;padding:10px 12px;font-weight:700}
 #modal{position:absolute;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
 #modal.on{display:flex}
 #modal .box{background:var(--panel);border:2px solid #000;border-radius:16px;max-height:85dvh;overflow:auto;width:100%;max-width:440px;padding:16px;display:flex;flex-direction:column;gap:10px}
 #modal h3{margin:0;font-size:18px;color:var(--gold)}
 .list{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.list .card{flex:0 0 96px;height:126px}
+.list .card{flex:0 0 92px;height:146px}
 .opt{text-align:left;font-size:15px}
 .stats{background:#000a;border-radius:12px;padding:10px 14px;line-height:1.9;font-size:14px}
 .rank{font-family:var(--title);font-size:72px;text-align:center;color:var(--gold);text-shadow:0 4px 0 #6b3b12;line-height:1}
@@ -237,6 +276,25 @@ const FLOOR=0,ROCK=1,PIT=2;
 const DEBUG=/debug/.test(location.search);
 let SPEED=1;
 let run=null;
+const IMG={akane:'img/akane.webp',mio:'img/mio.webp',akaneF:'img/akane_face.webp',mioF:'img/mio_face.webp'};
+const FACE={akane:{},mio:{}};
+['smile','shout','laugh','giggle','smug'].forEach(m=>FACE.akane[m]=`img/f_akane_${m}.webp`);
+['smile','closed','normal','think','soft'].forEach(m=>FACE.mio[m]=`img/f_mio_${m}.webp`);
+const DEF_MOOD={akane:'smile',mio:'normal'};
+const faceSrc=(who,mood)=>FACE[who][mood]||FACE[who][DEF_MOOD[who]];
+Object.values(IMG).concat(Object.values(FACE.akane),Object.values(FACE.mio)).forEach(u=>{const i=new Image();i.src=u});
+const LINES={
+  fall:['落ちたっ！','穴までいってらっしゃ〜い！','ナイス押し出しっ！','はい、一名様ご案内〜！'],
+  ff:['同士討ち、いただき！','仲間に当ててやんの〜！','向き、考えなよね〜'],
+  coll:['ドーン！','壁ドンならぬ岩ドン！','いい音したね〜'],
+  hurt:['いったぁ…！','まだまだっ！','やるじゃん…！'],
+  kill:['よしっ！','一丁あがり！'],
+  enemy:['相手の番よ。赤いマスを見て。','来るわ。構えて。'],
+  turn:['よーし、こっちの番！','どこから押そっか？'],
+  boss:['大鬼よ。重いから穴に落としても這い上がってくるわ。'],
+  win:['見事ね。次へ行きましょう。','上出来よ、アカネ。'],
+};
+const line=k=>pick(LINES[k]);
 const $=s=>document.querySelector(s);
 const app=$('#app');
 const rnd=n=>Math.floor(Math.random()*n);
@@ -307,7 +365,7 @@ const CARDS={
   ukenagashi:{n:'受け流し',c:1,k:'def',r:'c',t:'self',v:{b:5,m:1},u:{b:8,m:2},tx:v=>`ブロック${v.b}。移動力+${v.m}`,fx:async(x,v)=>{gainBlock(v.b);addMove(v.m)}},
   yochi:{n:'先読み',c:1,k:'skl',r:'c',t:'self',v:{dr:2},u:{c:0,dr:2},tx:v=>`カードを${v.dr}枚引く`,fx:async(x,v)=>draw(v.dr)},
   kairiki:{n:'怪力',c:1,k:'skl',r:'u',t:'self',v:{k:3},u:{k:5},tx:v=>`このターン、衝突ダメージ+${v.k}`,fx:async(x,v)=>{B.kairiki+=v.k;praise('怪力!')}},
-  iwaotoshi:{n:'岩落とし',c:1,k:'skl',r:'u',t:'any',v:{d:6,rg:3},u:{d:9,rg:4},tx:v=>`${v.rg}マス以内の空きマスに岩を置く。敵を選ぶと${v.d}ダメージ（岩は残らない）`,
+  iwaotoshi:{n:'机落とし',c:1,k:'skl',r:'u',t:'any',v:{d:6,rg:3},u:{d:9,rg:4},tx:v=>`${v.rg}マス以内の空きマスに机を置く。敵を選ぶと${v.d}ダメージ（机は残らない）`,
     fx:async(x,v)=>{if(x.u){await drop(x.x,x.y);await hit(x.u,v.d,B.pl)}else{await drop(x.x,x.y);B.g[x.y][x.x]=ROCK;buildTiles();render()}}},
   renda:{n:'連撃',c:2,k:'atk',r:'u',t:'adj',v:{d:3},u:{d:4},tx:v=>`隣の敵に${v.d}ダメージを3回`,
     fx:async(x,v)=>{for(let i=0;i<3&&x.u.alive;i++)await atk(x,v.d)}},
@@ -329,6 +387,11 @@ const CARDS={
 };
 CARDS.mayoi={n:'迷い',c:99,k:'skl',r:'x',t:'none',v:{},u:{},tx:()=>'使えない。手札を1枚ふさぐ（店や道場で捨てられる）',fx:async()=>{}};
 const STARTER=['tsuki','tsuki','tsuki','tsuki','kamae','kamae','kamae','kamae','fumikomi','taiatari'];
+const GLYPH={tsuki:'突',kamae:'構',fumikomi:'歩',taiatari:'体',harite:'張',shihou:'払',seoi:'投',kusari:'鎖',ishi:'石',shouha:'波',irekae:'替',teppeki:'壁',
+  ukenagashi:'流',yochi:'読',kairiki:'力',iwaotoshi:'机',renda:'連',konshin:'魂',acchi:'向',shippu:'風',fukitobashi:'飛',tsunami:'潮',kyuusho:'急',otoshiana:'穴',mayoi:'迷'};
+const KIND={atk:'攻',def:'守',skl:'技'};
+function cardInner(c){const d=CARDS[c.id];const k=ccost(c);
+  return `<div class="cc">${k>=99?'×':k}</div><div class="ct">${KIND[d.k]}</div><div class="art"><span class="em">${GLYPH[c.id]||'？'}</span></div><div class="cn">${cname(c)}</div><div class="tx">${ctext(c)}</div>`}
 const cv=c=>{const d=CARDS[c.id];return c.up?Object.assign({},d.v,d.u):d.v};
 const ccost=c=>{const v=cv(c);return v.c!=null?v.c:CARDS[c.id].c};
 const cname=c=>CARDS[c.id].n+(c.up?'+':'');
@@ -443,12 +506,15 @@ function showMap(){
   app.innerHTML=`<div class="scr">${hudHtml()}
     <div class="maph"><span>${run.pos?run.pos.f+1:0}階 / ${F}階　<small style="color:var(--muted)">光る所を選ぶ</small></span><button class="sub" id="deckb" style="padding:6px 10px;font-size:13px">デッキ ${run.deck.length}</button></div>
     <div class="mapw" id="mapw"><svg width="${W}" height="${H}">${lines}${nodes}</svg></div>
+    <div class="mapmemo"><img src="${FACE.mio[pick(['soft','smile','think'])]}" alt=""><div>${pick(MEMO)}</div></div>
     <div class="legend">${Object.values(NODE).map(n=>`<span>${n.ic} ${n.n}</span>`).join('')}</div></div><div id="modal"></div>`;
   hudBind();
   $('#deckb').onclick=()=>showDeck();
   const mw=$('#mapw');const cy=run.pos?Y(run.pos.f):Y(0);mw.scrollTop=Math.max(0,cy-mw.clientHeight*.65);
   mw.querySelectorAll('.node.av').forEach(g=>g.onclick=()=>{ac();const f=+g.dataset.f,i=+g.dataset.i;run.pos={f,i};enterNode(fl[f][i])});
 }
+const MEMO=['💀の強敵は手強いけど、倒せばお守りが手に入るわ。','🔥休憩では、休むか技を鍛えるか。鍛えた技は長く効くわよ。','🛒お店では技を捨てることもできるの。山札は軽い方が強いわ。',
+  '押す技が多いほど、穴と岩が武器になる。地形をよく見て。','一番上の👿が大鬼。そこまでにHPを残しておきなさい。','❓の出来事は運試し。HPに余裕がある時に寄るといいわ。'];
 function enterNode(n){
   sfx('card');
   if(n.t==='battle'||n.t==='elite'||n.t==='boss')startBattle(n.t);
@@ -626,6 +692,7 @@ function startTurn(first){
   B.busy=false;
   if(!first){banner('あなたの番');sfx('turn')}
   if(B.tut&&B.turn===1)B.tutStep=0;
+  if(first&&B.kind==='boss')say('mio',line('boss'),3200,'normal');
   render();
 }
 function draw(n,fresh){
@@ -644,7 +711,7 @@ async function endTurn(){
   B.disc.push(...B.hand);B.hand=[];
   if(B.tut&&B.tutStep<3)B.tutStep=3;
   render();
-  banner('敵の番','en');await sleep(380);
+  banner('敵の番','en');say('mio',line('enemy'),1200,'think');await sleep(380);
   // 1) 予告どおりに攻撃（同じ情報で動く 桜井 #228：ランダムな命中判定は使わない）
   for(const e of B.units.slice()){
     if(e.pl||!e.alive)continue;
@@ -693,8 +760,8 @@ async function hit(u,d,src,o={}){
   const big=dealt>=10||o.big;
   hitmark(u,big);float(u,'-'+dealt,big?'big':'');
   if(u.pl)sfx('hurt');else sfx(big?'big':'hit');
-  if(src&&!src.pl&&!u.pl&&src!==u){run.stats.ff++;praise('同士討ち!');if(run.stats.ff>=3)ach('ff3')}
-  if(u.pl)B.hurt=true;
+  if(src&&!src.pl&&!u.pl&&src!==u){run.stats.ff++;cutin('同士討ち！','smug');say('akane',line('ff'),1600,'smug');if(run.stats.ff>=3)ach('ff3')}
+  if(u.pl){B.hurt=true;if(dealt>=8)say('akane',line('hurt'),1400,'smug')}
   // ヒットストップ：受けた側を大きく、与えた側を小さく震わせる（桜井 #047）
   const hs=big?P['ヒットストップ大ms']:dealt>=5?P['ヒットストップ中ms']:P['ヒットストップ小ms'];
   jit(u,'jit',hs);if(src&&src.alive)jit(src,'jit1',hs);
@@ -714,7 +781,7 @@ async function collide(u,o,nx,ny){
   don(fx,fy,'ドン!');sfx('coll');shake('m');
   run.stats.maxColl=Math.max(run.stats.maxColl,cd*(o?2:1));if(cd*(o?2:1)>=12)ach('coll12');
   await hit(u,cd,null);
-  if(o&&o.alive){await hit(o,cd,null);if(!u.pl&&!o.pl)praise('まとめて!')}
+  if(o&&o.alive){await hit(o,cd,null);if(!u.pl&&!o.pl){praise('まとめて!');say('akane',line('coll'),1400,'shout')}}
 }
 async function push(u,d,n,pull){
   if(!u||!u.alive||n<=0)return;
@@ -736,7 +803,7 @@ async function fall(u){
     if(!u.pl){praise('落ちた!');ach('boss_pit')}
     await hit(u,dmg,null,{big:1});return;
   }
-  u.alive=false;run.stats.falls++;sfx('fall');removeEl(u,'fall');praise('落とした!');ach('fall1');if(run.stats.falls>=5)ach('falls5');
+  u.alive=false;run.stats.falls++;sfx('fall');removeEl(u,'fall');cutin('落としたっ！','laugh');say('akane',line('fall'),1600,'laugh');ach('fall1');if(run.stats.falls>=5)ach('falls5');
   if(has('jizo')){heal(3)}
   await sleep(330);render();
 }
@@ -754,7 +821,7 @@ async function atk(x,d,big){const p=B.pl;await lunge(p,x.dir);if(d>0)await hit(x
 async function shoot(x){const p=B.pl;const el=document.createElement('div');el.className='don';el.textContent='●';el.style.fontSize='16px';
   el.style.left=(p.x+.5)*T+'px';el.style.top=(p.y+.5)*T+'px';el.style.transition='left .12s linear,top .12s linear';$('#fx').appendChild(el);
   sfx('move');await sleep(16);el.style.left=(x.u.x+.5)*T+'px';el.style.top=(x.u.y+.5)*T+'px';await sleep(120);el.remove()}
-async function drop(x,y){const el=document.createElement('div');el.className='don';el.textContent='🪨';el.style.fontSize='34px';el.style.left=(x+.5)*T+'px';el.style.top=(y-1)*T+'px';
+async function drop(x,y){const el=document.createElement('div');el.className='don';el.textContent='▬';el.style.fontSize='40px';el.style.color='#c98b4e';el.style.left=(x+.5)*T+'px';el.style.top=(y-1)*T+'px';
   el.style.transition='top .14s ease-in';$('#fx').appendChild(el);await sleep(16);el.style.top=(y+.5)*T+'px';await sleep(140);el.remove();sfx('coll');shake('m')}
 const pv=p=>p>0?p+(has('ootsuchi')?1:0):0;
 
@@ -797,17 +864,17 @@ function undoMove(){if(!B.undo||B.busy)return;B.pl.x=B.undo.x;B.pl.y=B.undo.y;B.
 function checkWin(){
   if(B.won||enemies().length)return false;
   B.won=true;B.busy=true;run.hp=Math.max(1,B.pl.hp);
-  (async()=>{await sleep(250);flash();sfx('win');banner('勝ち!');await sleep(700);winBattle()})();
+  (async()=>{await sleep(250);flash();sfx('win');banner('勝ち!');say('mio',line('win'),1500,'closed');await sleep(700);winBattle()})();
   return true;
 }
 
 /* ---------- 戦闘画面 ---------- */
 let T=56;
 function buildBattleDom(){
-  T=Math.floor(Math.min(64,(Math.min(app.clientWidth,480)-20)/N,(app.clientHeight-370)/N));T=Math.max(T,40);
+  T=Math.floor(Math.min(64,(Math.min(app.clientWidth,480)-20)/N,(app.clientHeight-420)/N));T=Math.max(T,40);
   app.innerHTML=`<div class="scr" id="bscr" style="overflow:hidden">${hudHtml(true)}
     <div id="bwrap"><div id="board" style="--T:${T}px"><div id="tiles"></div><div id="units"></div><div id="fx"></div></div></div>
-    <div class="info" id="info"></div>
+    <div class="talk"><img class="face" id="face" src="${FACE.akane.smile}" alt=""><div class="info"><div class="who" id="who">アカネ</div><div id="info"></div></div></div>
     <div class="ctrl"><div class="orb" id="orb"></div><div class="mv" id="mv"></div><div class="sp"></div>
       <button class="sub" id="pile" style="font-size:12px;padding:8px 8px">山札</button><button class="sub" id="undo">↶</button><button id="endt">ターン終了</button></div>
     <div class="hand" id="hand"></div>${DEBUG?'<div class="dbg"><button id="dw">勝つ</button><button id="de">E+3</button><button id="dsp">速</button></div>':''}</div><div id="modal"></div>`;
@@ -830,7 +897,7 @@ function buildTiles(){
 function mkUnitEl(u){
   const el=document.createElement('div');
   el.className='unit'+(u.pl?' pl':'')+(u.def&&u.def.boss?' boss':'')+(u.def&&u.def.elite?' elite':'');
-  el.innerHTML=`${u.pl?'':'<div class="arw"></div>'}<div class="tok">${u.pl?'🥋':u.def.ic}</div><div class="hp"><i></i></div>${u.pl?'<div class="shd" style="display:none"></div>':'<div class="ord"></div><div class="it"></div>'}`;
+  el.innerHTML=`${u.pl?'':'<div class="arw"></div>'}<div class="tok">${u.pl?`<img src="${FACE.akane.smile}" alt="">`:u.def.ic}</div><div class="hp"><i></i></div>${u.pl?'<div class="shd" style="display:none"></div>':'<div class="ord"></div><div class="it"></div>'}`;
   $('#units').appendChild(el);u.el=el;place(u);
 }
 function place(u){if(u.el)u.el.style.transform=`translate(${u.x*T}px,${u.y*T}px)`}
@@ -847,6 +914,11 @@ function flash(){const b=$('#board');if(!b)return;const el=document.createElemen
 function praise(t){const s=$('#bscr')||app;const el=document.createElement('div');el.className='praise';el.textContent=t;
   const b=$('#bwrap');if(b){el.style.top=(b.offsetTop+b.offsetHeight*.45)+'px'}s.appendChild(el);setTimeout(()=>el.remove(),950)}
 function banner(t,cls){const s=$('#bscr');if(!s)return;const el=document.createElement('div');el.className='banner '+(cls||'');el.textContent=t;s.appendChild(el);setTimeout(()=>el.remove(),600)}
+function say(who,t,ms=1600,mood){if(!B)return;B.say={who,t,mood};clearTimeout(B.sayT);B.sayT=setTimeout(()=>{if(B&&B.say&&B.say.t===t){B.say=null;render()}},ms*SPEED);render()}
+let lastCut=0;
+function cutin(t,face){face=face&&!face.includes('/')?FACE.akane[face]:face;const now=Date.now();if(now-lastCut<500)return;lastCut=now;const b=$('#bwrap');if(!b)return;
+  const el=document.createElement('div');el.className='cutin';el.style.top=(b.offsetTop+b.offsetHeight*.38)+'px';
+  el.innerHTML=`<img src="${face||IMG.akaneF}" alt=""><span>${t}</span>`;$('#bscr').appendChild(el);setTimeout(()=>el.remove(),720)}
 function msg(t){B.msg=t;render();setTimeout(()=>{if(B&&B.msg===t){B.msg='';render()}},1600)}
 
 function tapTile(x,y){
@@ -907,17 +979,21 @@ function render(){
   });
   // 情報行（ヘルプ文は用語を避け、やることを書く 桜井 #238）
   let h='';
-  const TUT=['<span class="hint">① 青く光るマスをタップして、上の小鬼の目の前まで進もう</span>',
-    '<span class="hint">② 「突き」をタップ → 黄色い小鬼をタップ。後ろの穴へ押し出せ！</span>',
-    '<span class="hint">③ 赤いマスは次の敵の攻撃。そこから出れば当たらない。「構え」で守ってもいい。終わったら「ターン終了」</span>',
-    '<span class="hint">③ 赤いマスは次の敵の攻撃。そこから出れば当たらない。終わったら「ターン終了」</span>',
-    '<span class="hint">敵をぶつけ合ったり、岩や壁にぶつけたり（ドン!）、他の敵の攻撃マスに押し込むのも強い</span>'];
+  const TUT=['まずは移動！ <span class="hint">光ってるマスをタップして、上の小鬼の目の前まで行こっ</span>',
+    'いい位置！ <span class="hint">「突き」をタップ → 黄色く光る小鬼をタップ。後ろの穴に落としちゃえ！</span>',
+    '<span class="hint">赤いマスは次の敵の攻撃だよ。そこから出れば当たらないし、「構え」で守ってもOK。終わったら「ターン終了」！</span>',
+    '<span class="hint">赤いマスは次の敵の攻撃だよ。出ちゃえば当たらない！ 終わったら「ターン終了」</span>',
+    '敵同士ぶつけたり、岩に<b>ドン!</b>したり、<span class="hint">他の敵の攻撃マスに押し込む</span>のも強いよ！'];
+  let who='akane',mood=B.sel>=0?'shout':(B.tut&&B.tutStep===2?'laugh':'smile');
   if(B.msg)h=`<b>${esc(B.msg)}</b>`;
   else if(B.sel>=0){const c=B.hand[B.sel];h=`<b>${cname(c)}</b>（${ccost(c)}）${ctext(c)}<br><span class="hint">${CARDS[c.id].t==='self'?'もう一度タップで使う':'黄色く光る所をタップ'}</span>`}
   else if(B.focus&&B.focus.alive){const e=B.focus;h=`<b>${e.def.n}</b> HP ${e.hp}/${e.maxHp}　次：${intentText(e)}<br><small>${e.def.tr}</small>`}
+  else if(B.say){h=esc(B.say.t);who=B.say.who;mood=B.say.mood}
   else if(B.tut&&B.tutStep!=null&&B.tutStep<5)h=TUT[B.tutStep];
-  else{const pr=predicted();h=pr?`このままだと <b style="color:#ff8a80">${Math.max(0,pr-B.block)}ダメージ</b>${B.block?`（ブロック${B.block}で軽減）`:''}。赤いマスから出るか、守ろう`:'敵をタップで詳しく。青いマスで移動、カードで攻撃'}
+  else{const pr=predicted();h=pr?`このままだと <b>${Math.max(0,pr-B.block)}ダメージ</b>${B.block?`（ブロック${B.block}で軽減）`:''}もらっちゃう！ 赤いマスから出るか、守ろっ`:'敵をタップすると何してくるか分かるよ。光るマスで移動、カードで攻撃！'}
   $('#info').innerHTML=h;
+  const fc=$('#face'),wl=$('#who');const src=faceSrc(who,mood);if(fc.getAttribute('src')!==src)fc.setAttribute('src',src);
+  fc.classList.toggle('mio',who==='mio');wl.textContent=who==='mio'?'会長・ミオ':'アカネ';wl.classList.toggle('mio',who==='mio');
   // 操作
   const orb=$('#orb');orb.textContent=`${B.energy}/${P['毎ターンのエネルギー']}`;orb.classList.toggle('z',B.energy<=0);
   $('#mv').innerHTML=`👣${B.move}`;
@@ -929,7 +1005,7 @@ function render(){
   const hd=$('#hand');
   hd.innerHTML=B.hand.map((c,i)=>{const no=!!playable(c);const d=CARDS[c.id];
     return`<div class="card ${d.k} ${c.up?'up':''} ${i===B.sel?'sel':''} ${no?'no':''} ${c.fresh?'enter':''}" data-i="${i}" style="${c.fresh?`animation-delay:${i*40}ms`:''}">
-      <div class="cc">${ccost(c)>=99?'×':ccost(c)}</div><div class="ct">${{atk:'攻',def:'守',skl:'技'}[d.k]}</div><div class="cn">${cname(c)}</div>${ctext(c)}</div>`}).join('');
+${cardInner(c)}</div>`}).join('');
   B.hand.forEach(c=>delete c.fresh);
 }
 
@@ -961,7 +1037,7 @@ function hudUpdate(){
 function modal(html){const m=$('#modal');m.innerHTML=`<div class="box">${html}</div>`;m.classList.add('on');m.onclick=e=>{if(e.target===m)closeModal()}}
 function closeModal(){const m=$('#modal');if(m){m.classList.remove('on');m.innerHTML=''}}
 window.closeModal=closeModal;
-function cardHtml(c,extra=''){const d=CARDS[c.id];return`<div class="card ${d.k} ${c.up?'up':''}" ${extra}><div class="cc">${ccost(c)>=99?'×':ccost(c)}</div><div class="ct">${{atk:'攻',def:'守',skl:'技'}[d.k]}</div><div class="cn">${cname(c)}</div>${ctext(c)}</div>`}
+function cardHtml(c,extra=''){const d=CARDS[c.id];return`<div class="card ${d.k} ${c.up?'up':''}" ${extra}>${cardInner(c)}</div>`}
 function showDeck(){modal(`<h3>デッキ（${run.deck.length}枚）</h3><div class="list">${run.deck.map(c=>cardHtml(c)).join('')}</div><button onclick="closeModal()">閉じる</button>`)}
 function showPiles(){modal(`<h3>山札 ${B.drawP.length}枚（順番は秘密）</h3><div class="list">${B.drawP.slice().sort((a,b)=>a.id<b.id?-1:1).map(c=>cardHtml(c)).join('')||'<p>なし</p>'}</div>
   <h3>捨て札 ${B.disc.length}枚</h3><div class="list">${B.disc.map(c=>cardHtml(c)).join('')||'<p>なし</p>'}</div><button onclick="closeModal()">閉じる</button>`)}
@@ -969,7 +1045,7 @@ function showHelp(){modal(`<h3>遊び方</h3><div class="howto" style="max-width
   <p>🎯 <b>敵を全部倒せば勝ち。</b>穴（黒いマス）に押し出せば一発で倒せる。</p>
   <p>🟥 <b>赤いマス＝次の敵の攻撃。</b>数字はダメージ。ターン終了後、その通りに攻撃が来る。マスから出れば当たらない。</p>
   <p>↔️ 敵の攻撃は<b>敵の向き</b>で決まる。押したり入れ替えたりすると攻撃の向きもずれる → <b>敵同士で当てられる</b>。</p>
-  <p>💥 押した敵が岩・壁・他の駒にぶつかると<b>衝突ダメージ</b>（両方に）。</p>
+  <p>💥 押した敵が机（岩）・壁・他の駒にぶつかると<b>衝突ダメージ</b>（両方に）。</p>
   <p>👣 毎ターン2マス歩ける（無料）。⚡ カードはエネルギーを使う。🛡 ブロックは次のターンのはじめに消える。</p>
   <p>🟪 紫＝場所が固定の雷。🟧 オレンジ＝自爆の範囲。🟩 緑＝手下が出てくる所。</p>
   <p>敵をタップすると、性格と次の行動が見られる。</p></div>
@@ -1076,6 +1152,8 @@ function showEnd(win,snap,spec){
   const reach=win?'大鬼を倒した！':`${run.pos?run.pos.f+1:1}階で力尽きた`;
   app.innerHTML=`<div class="scr"><div class="panel"><h2>${win?'優勝！':'負けた…'}</h2>
     <p style="text-align:center;font-weight:800">${reach}</p>
+    <img class="endgirl" src="${win?IMG.akane:IMG.mio}" alt="">
+    <p style="text-align:center;font-weight:700;margin-top:-4px">${win?'「やったー！ 優勝だよ、会長！」':'「次は作戦を変えましょう。…まだいけるわね、アカネ？」'}</p>
     <div class="rank">${rk}</div><p style="text-align:center">スコア ${sc}${nb?' <b style="color:var(--gold)">自己ベスト！</b>':''}</p>
     ${run.ascUp?`<div class="rew" style="background:#4a1d10">🔥 本気度${run.ascUp}が解放された！（${ASC[run.ascUp]}）</div>`:''}
     ${na.length?`<div class="stats"><b>今回の実績</b><br>${na.map(a=>`${a.ic} ${a.n}${a.un?`（技「${CARDS[a.un].n}」解放）`:''}`).join('<br>')}</div>`:''}
@@ -1099,8 +1177,9 @@ function showTitle(){
   B=null;
   const saved=ls.get('oshidashi.run',null);const best=ls.get('oshidashi.best',null);
   app.innerHTML=`<div class="scr title">
-    <h1>オシダシ</h1><div class="tag">押して、ぶつけて、落とせ。</div>
-    <div class="demo"><span class="p">🥋</span><span class="e">👹</span><span>🕳️</span></div>
+    <div class="girls"><img class="mio" src="${IMG.mio}" alt="生徒会長・天道ミオ"><img class="akane" src="${IMG.akane}" alt="押切アカネ"></div><div class="shade"></div>
+    <div class="logo"><h1>オシダシ！</h1><div class="club">放課後おしだし部</div></div>
+    <div class="tag">押して、ぶつけて、落とせ。</div>
     ${META.ascOpen?`<div class="asc"><button class="sub" id="am">−</button><span>本気度 <span id="av">${META.asc}</span>　<small id="ad" style="color:var(--muted);font-weight:600"></small></span><button class="sub" id="ap">＋</button></div>`:'<div class="best">優勝すると「本気度」が解放される</div>'}
     <div class="btns"><button id="go">はじめる</button>${saved&&saved.ver===1?'<button class="sub" id="cont">つづきから</button>':''}
       <button class="sub" id="achb">実績 ${ACH.filter(a=>META.ach[a.id]).length}/${ACH.length}</button><button class="sub" id="how">遊び方</button></div>

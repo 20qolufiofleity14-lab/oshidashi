@@ -167,6 +167,7 @@ html.embed .title .logo{top:16px}
 .cutin{position:absolute;left:-10%;right:-10%;height:86px;z-index:25;pointer-events:none;transform:rotate(-7deg);
   background:linear-gradient(90deg,#7a2533,#ff7a3d);box-shadow:0 0 0 4px #f6efe2,0 0 0 7px #000;display:flex;align-items:center;overflow:hidden;animation:cut .7s ease-out forwards}
 .cutin img{height:150%;margin-left:14%;align-self:flex-start;animation:cutf .7s ease-out forwards}
+.cutin img[src*=cut_]{height:190%;margin-top:-10px;filter:drop-shadow(0 4px 0 rgba(0,0,0,.35))}
 .cutin span{font-family:var(--title);font-size:30px;color:#fff;-webkit-text-stroke:2px #000;paint-order:stroke;margin-left:10px;white-space:nowrap}
 @keyframes cut{0%{clip-path:inset(0 100% 0 0)}18%{clip-path:inset(0 0 0 0)}80%{opacity:1}100%{opacity:0;clip-path:inset(0 0 0 0)}}
 @keyframes cutf{from{translate:-60px 0}25%{translate:0 0}}
@@ -833,7 +834,7 @@ async function fall(u){
     if(!u.pl){praise('落ちた!');ach('boss_pit')}
     await hit(u,dmg,null,{big:1});return;
   }
-  u.alive=false;run.stats.falls++;sfx('fall');removeEl(u,'fall');cutin('落としたっ！','laugh');say('akane',line('fall'),1600,'laugh');ach('fall1');if(run.stats.falls>=5)ach('falls5');
+  u.alive=false;run.stats.falls++;sfx('fall');removeEl(u,'fall');cutin('落としたっ！','img/cut_akane.webp');say('akane',line('fall'),1600,'laugh');ach('fall1');if(run.stats.falls>=5)ach('falls5');
   if(has('jizo')){heal(3)}
   await sleep(330);render();
 }
